@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>VDX — Full Prototype</title>
+<title>VDX — Real Prototype</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: #f5f5f7; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
@@ -101,6 +101,8 @@
   .carousel-dot.active { background: #6c3aed; width: 18px; border-radius: 3px; }
   .discovery-badge { position: absolute; bottom: 20px; left: 20px; right: 20px; background: #f0eeff; border: 1px solid #c4b5fd; border-radius: 12px; padding: 10px 14px; color: #6c3aed; font-size: 12px; text-align: center; display: none; }
   .browser-warning { position: absolute; bottom: 20px; left: 20px; right: 20px; background: #fef3c7; border: 1px solid #fde68a; border-radius: 10px; padding: 10px 14px; color: #92400e; font-size: 12px; text-align: center; display: none; }
+  .action-button { display: inline-block; margin-top: 12px; padding: 10px 20px; border-radius: 10px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; background: #6c3aed; color: #fff; text-decoration: none; text-align: center; width: 100%; }
+  .action-button:active { background: #5a2fd0; }
   @media (max-width: 480px) { .phone { width: 100%; height: 100vh; border-radius: 0; padding: 12px; } }
 </style>
 </head>
@@ -131,16 +133,17 @@
 
     <div class="transcript-box" id="transcriptBox"></div>
 
-    <!-- Confirmation Card (DONE) -->
+    <!-- Result Card (DONE) -->
     <div class="card confirm-card" id="confirmCard">
       <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       <div class="title">Done</div>
       <div class="message" id="confirmMessage">Rahul's phone is now ringing.</div>
       <div class="receipt" id="confirmReceipt"></div>
       <div class="confidence-badge" id="confidenceBadge"></div>
+      <a class="action-button" id="actionButton" href="#" target="_blank" style="display:none;">Open</a>
     </div>
 
-    <!-- Confirmation Action Card (Tier 2 — needs user to confirm) -->
+    <!-- Confirmation Action Card (Tier 2) -->
     <div class="card confirm-action-card" id="confirmActionCard">
       <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
       <div class="title">Confirm</div>
@@ -164,7 +167,7 @@
     <!-- Example Carousel -->
     <div class="carousel" id="carousel">
       <div class="carousel-label" id="carouselLabel">Try saying</div>
-      <div class="carousel-example" id="carouselText">"Remind me to call Rahul at 9pm"</div>
+      <div class="carousel-example" id="carouselText">"Call Eva"</div>
       <div class="carousel-dots" id="carouselDots"></div>
     </div>
 
@@ -202,102 +205,38 @@
   const btnCancel = document.getElementById('btnCancel');
   const discoveryBadge = document.getElementById('discoveryBadge');
   const browserWarning = document.getElementById('browserWarning');
+  const actionButton = document.getElementById('actionButton');
 
-  // ===== CONTACTS DATABASE (simulated) =====
-  const contacts = [
-    { name: 'Rahul', phones: { mobile: '+91-9876543210', work: '+91-1122334455' } },
-    { name: 'Mom', phones: { mobile: '+91-9988776655' } },
-    { name: 'Rahul Sharma', phones: { mobile: '+91-9876543210' } },
-    { name: 'Rahul Kumar', phones: { mobile: '+91-5566778899' } },
-    { name: 'Priya', phones: { mobile: '+91-8877665544' } },
-    { name: 'Apollo Pharmacy', phones: { mobile: '+91-1800-123-456' } },
-    { name: 'Ananya', phones: { mobile: '+91-7766554433' } },
-    { name: 'Vikram', phones: { mobile: '+91-6655443322' } },
+  // ===== EXAMPLES =====
+  const allExamples = [
+    '"Call Eva"',
+    '"Message Eva"',
+    '"WhatsApp Eva"',
+    '"Navigate to Apollo Pharmacy"',
+    '"Set a timer for 10 minutes"',
+    '"What\'s the weather in Mumbai"',
+    '"Open camera"',
+    '"Set an alarm for 6am"',
+    '"Remind me to buy milk at 5pm"',
   ];
 
-  // ===== PREFERENCES (learned over time) =====
-  let preferences = {
-    frequentContacts: {},  // name -> count
-    lastUsed: {},          // name -> {phoneType, time}
-  };
-
-  function learnPreference(name, phoneType) {
-    const key = name.toLowerCase();
-    preferences.frequentContacts[key] = (preferences.frequentContacts[key] || 0) + 1;
-    preferences.lastUsed[key] = { phoneType, time: Date.now() };
-  }
-
-  function getPreferredPhone(name) {
-    const key = name.toLowerCase();
-    const pref = preferences.lastUsed[key];
-    if (pref && pref.phoneType) return pref.phoneType;
-    return 'mobile';
-  }
-
-  // ===== CONTACT RESOLUTION (fuzzy match) =====
-  function resolveContact(name) {
-    const q = name.toLowerCase().trim();
-    const matches = contacts.filter(c => c.name.toLowerCase().includes(q) || q.includes(c.name.toLowerCase()));
-    if (matches.length === 0) return { status: 'not_found', name };
-    if (matches.length === 1) return { status: 'found', contact: matches[0] };
-    if (matches.length <= 3) return { status: 'ambiguous', matches, name };
-    return { status: 'too_many', name };
-  }
-
-  // ===== EXAMPLES (progressive disclosure) =====
-  const allExamples = {
-    basic: [
-      '"Call Rahul"',
-      '"Set a timer for 10 minutes"',
-      '"Navigate to Apollo Pharmacy"',
-    ],
-    intermediate: [
-      '"Remind me to call Rahul at 9pm"',
-      '"Send a message to Mom"',
-      '"Text Priya saying I\'m on my way"',
-    ],
-    advanced: [
-      '"Set an alarm for 6am"',
-      '"Open the camera"',
-      '"WhatsApp Rahul"',
-      '"Create a calendar event for tomorrow at 3pm"',
-      '"Call Rahul on work"',
-    ],
-  };
-
-  let unlockedLevel = 'basic';
-  let successCount = 0;
   let exampleIndex = 0;
-  let currentExamples = allExamples.basic;
-
-  function getExamples() {
-    if (successCount >= 5) return [...allExamples.basic, ...allExamples.intermediate, ...allExamples.advanced];
-    if (successCount >= 2) return [...allExamples.basic, ...allExamples.intermediate];
-    return allExamples.basic;
-  }
 
   function updateCarousel() {
-    currentExamples = getExamples();
-    if (currentExamples.length === 0) return;
-    exampleIndex = exampleIndex % currentExamples.length;
-    carouselText.textContent = currentExamples[exampleIndex];
-    const dotCount = Math.min(currentExamples.length, 5);
+    carouselText.textContent = allExamples[exampleIndex];
     carouselDots.innerHTML = '';
+    const dotCount = Math.min(allExamples.length, 7);
     for (let i = 0; i < dotCount; i++) {
       const dot = document.createElement('div');
       dot.className = 'carousel-dot' + (i === exampleIndex % dotCount ? ' active' : '');
       carouselDots.appendChild(dot);
     }
-    // Update label based on unlocked level
-    if (successCount >= 5) carouselLabel.textContent = 'Try anything';
-    else if (successCount >= 2) carouselLabel.textContent = 'You\'re getting it';
-    else carouselLabel.textContent = 'Try saying';
   }
 
   function nextExample() {
-    exampleIndex = (exampleIndex + 1) % currentExamples.length;
-    carouselText.textContent = currentExamples[exampleIndex];
-    const dotCount = Math.min(currentExamples.length, 5);
+    exampleIndex = (exampleIndex + 1) % allExamples.length;
+    carouselText.textContent = allExamples[exampleIndex];
+    const dotCount = Math.min(allExamples.length, 7);
     document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
       dot.classList.toggle('active', i === exampleIndex % dotCount);
     });
@@ -332,101 +271,144 @@
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
-    recognition.maxAlternatives = 1;
+    recognition.maxAlternatives = 3;
   } else {
     browserWarning.style.display = 'block';
   }
 
-  // ===== INTENT PARSER (full VDX capabilities) =====
+  // ===== REAL EXECUTION ENGINE =====
+  // Opens the right app on your phone via deep links
+  function executeRealAction(intent, name, detail) {
+    const encoded = encodeURIComponent(name);
+    const encodedDetail = encodeURIComponent(detail || '');
+
+    switch (intent) {
+      case 'CALL':
+        // Opens dialer with the name — user just taps Call
+        return { url: `tel:${name}`, label: 'Open Dialer' };
+
+      case 'SMS':
+        // Opens SMS app with the name as recipient
+        return { url: `sms:${name}?body=${encodedDetail || 'Hi'}`, label: 'Open Messages' };
+
+      case 'WHATSAPP':
+        // Opens WhatsApp — if name looks like a number use wa.me, otherwise just open WhatsApp
+        if (name.replace(/[\s+\-]/g, '').match(/^\d{7,15}$/)) {
+          return { url: `https://wa.me/${name.replace(/[\s+\-]/g, '')}`, label: 'Open WhatsApp' };
+        }
+        return { url: `https://wa.me/?text=${encodedDetail || 'Hi ' + encoded}`, label: 'Open WhatsApp' };
+
+      case 'NAVIGATE':
+        return { url: `https://maps.google.com/?q=${encoded}`, label: 'Open Maps' };
+
+      case 'TIMER':
+        // Android intent to open Clock app timer
+        return { url: `intent://timer#Intent;action=android.intent.action.VIEW;package=com.google.android.deskclock;end`, label: 'Open Clock' };
+
+      case 'ALARM':
+        return { url: `intent://alarm#Intent;action=android.intent.action.VIEW;package=com.google.android.deskclock;end`, label: 'Open Clock' };
+
+      case 'WEATHER':
+        return { url: `https://www.google.com/search?q=weather+${encoded}`, label: 'Check Weather' };
+
+      case 'CAMERA':
+        return { url: `intent://camera#Intent;action=android.media.action.STILL_IMAGE_CAMERA;end`, label: 'Open Camera' };
+
+      case 'CALENDAR':
+        return { url: `intent://calendar#Intent;action=android.intent.action.VIEW;package=com.google.android.calendar;end`, label: 'Open Calendar' };
+
+      case 'REMINDER':
+        return { url: `intent://reminder#Intent;action=android.intent.action.VIEW;package=com.google.android.apps.tasks;end`, label: 'Open Tasks' };
+
+      default:
+        return null;
+    }
+  }
+
+  // ===== INTENT PARSER (works with ANY name) =====
   function parseIntent(transcript) {
     const t = transcript.toLowerCase().trim();
 
-    // CALL — "call X", "ring X", "phone X", "dial X", "I need to call X"
-    const callMatch = t.match(/(?:call|ring|phone|dial)\s+(?:my\s+)?(.+?)(?:\s+(mobile|phone|work|home|office))?(?:\s|$|\.)/);
+    // CALL — "call X", "ring X", "phone X", "dial X", "call X on mobile"
+    const callMatch = t.match(/(?:call|ring|phone|dial)\s+(?:my\s+)?(.+?)(?:\s+(?:on\s+)?(mobile|phone|work|home|office))?(?:\s|$|\.)/);
     if (callMatch) {
       const name = callMatch[1].trim().replace(/^(the|a|an)\s+/i, '');
-      const phoneType = callMatch[2] || getPreferredPhone(name);
-      const resolved = resolveContact(name);
-      let message, receipt;
-      if (resolved.status === 'found') {
-        const contact = resolved.contact;
-        learnPreference(contact.name, phoneType);
-        message = `${contact.name}'s phone is now ringing.`;
-        receipt = [`${contact.name} matched from contacts`, `Calling ${phoneType} number`];
-      } else if (resolved.status === 'ambiguous') {
-        const names = resolved.matches.map(c => c.name).join(' or ');
-        message = `Did you mean ${names}?`;
-        receipt = [`Multiple matches for "${name}"`, `Say the full name`];
-        return { intent: 'CALL', contact: name, detail: phoneType, message, receipt, confidence: 0.6, needsConfirm: true };
-      } else {
-        message = `Calling ${name}...`;
-        receipt = [`Contact "${name}" not in your list`, `Calling anyway`];
-      }
-      return { intent: 'CALL', contact: name, detail: phoneType, message, receipt, confidence: 0.9, needsConfirm: false };
+      const phoneType = callMatch[2] || 'mobile';
+      return { intent: 'CALL', name, detail: phoneType, message: `Calling ${name}...`, receipt: [`Opening dialer for ${name}`, `Phone: ${phoneType}`], confidence: 0.9, needsConfirm: false };
     }
 
-    // REMINDER — "remind me to X", "remind me X at Y", "set a reminder"
+    // REMINDER — "remind me to X", "remind me X at Y"
     const remindMatch = t.match(/(?:remind|reminder|set\s+(?:a\s+)?reminder)\s+(?:me\s+)?(?:to\s+)?(.+?)(?:\s+(?:at|in|by|for|about)\s+(.+))?$/);
     if (remindMatch) {
       const task = remindMatch[1].trim().replace(/^(to|about)\s+/i, '');
       const time = remindMatch[2] || 'now';
-      return { intent: 'REMINDER', contact: null, detail: `${task} at ${time}`, message: `You'll be reminded to ${task} at ${time}.`, receipt: [`Reminder set for ${time}`, `Task: ${task}`], confidence: 0.85, needsConfirm: false };
+      return { intent: 'REMINDER', name: '', detail: `${task} at ${time}`, message: `Reminder: ${task} at ${time}`, receipt: [`Task: ${task}`, `Time: ${time}`], confidence: 0.85, needsConfirm: false };
     }
 
-    // NAVIGATE — "navigate to X", "take me to X", "go to X", "find X", "directions to X"
+    // NAVIGATE — "navigate to X", "take me to X", "go to X", "directions to X"
     const navMatch = t.match(/(?:navigate|take\s+(?:me\s+)?to|go\s+to|drive\s+to|directions\s+to|find|show\s+(?:me\s+)?(?:the\s+)?way\s+to)\s+(.+?)$/);
     if (navMatch) {
       const place = navMatch[1].trim().replace(/^(the|a|an)\s+/i, '');
-      return { intent: 'NAVIGATE', contact: null, detail: place, message: `Maps is taking you to ${place.charAt(0).toUpperCase() + place.slice(1)}.`, receipt: [`Destination: ${place.charAt(0).toUpperCase() + place.slice(1)}`, 'Best route calculated'], confidence: 0.9, needsConfirm: false };
+      return { intent: 'NAVIGATE', name: place, detail: '', message: `Navigating to ${place}`, receipt: [`Destination: ${place}`, 'Opening Maps'], confidence: 0.9, needsConfirm: false };
     }
 
-    // TIMER — "set a timer for X", "timer X minutes", "X minute timer"
+    // TIMER — "set a timer for X", "X minute timer", "X minutes"
     const timerMatch = t.match(/(?:set\s+(?:a|an)\s+)?timer\s+(?:for\s+)?(.+?)$/);
     if (timerMatch) {
       const duration = timerMatch[1].trim();
-      return { intent: 'TIMER', contact: null, detail: duration, message: `Timer set for ${duration}.`, receipt: [`Timer: ${duration}`, "You'll be notified when time's up"], confidence: 0.9, needsConfirm: false };
+      return { intent: 'TIMER', name: '', detail: duration, message: `Timer set for ${duration}`, receipt: [`Duration: ${duration}`], confidence: 0.9, needsConfirm: false };
     }
     const durationMatch = t.match(/^(.+?)\s+(minutes|seconds|mins|secs)\s*$/);
     if (durationMatch) {
       const num = durationMatch[1].trim();
       const unit = durationMatch[2];
-      return { intent: 'TIMER', contact: null, detail: `${num} ${unit}`, message: `Timer set for ${num} ${unit}.`, receipt: [`Timer: ${num} ${unit}`, "You'll be notified when time's up"], confidence: 0.85, needsConfirm: false };
+      return { intent: 'TIMER', name: '', detail: `${num} ${unit}`, message: `Timer set for ${num} ${unit}`, receipt: [`Duration: ${num} ${unit}`], confidence: 0.85, needsConfirm: false };
     }
 
-    // ALARM — "set an alarm for X", "wake me up at X", "alarm at X"
+    // ALARM — "set an alarm for X", "wake me up at X"
     const alarmMatch = t.match(/(?:set\s+(?:an\s+)?|create\s+(?:an\s+)?)?alarm\s+(?:for\s+)?(.+?)$|wake\s+(?:me\s+)?up\s+(?:at\s+)?(.+?)$/);
     if (alarmMatch) {
       const time = alarmMatch[1] || alarmMatch[2] || 'morning';
-      return { intent: 'ALARM', contact: null, detail: time, message: `Alarm set for ${time}.`, receipt: [`Alarm: ${time}`, 'You\'ll be woken up'], confidence: 0.85, needsConfirm: false };
+      return { intent: 'ALARM', name: '', detail: time, message: `Alarm set for ${time}`, receipt: [`Time: ${time}`], confidence: 0.85, needsConfirm: false };
     }
 
-    // WHATSAPP — "WhatsApp X", "WhatsApp X saying Y"
-    const waMatch = t.match(/(?:whatsapp|wa)\s+(.+?)(?:\s+(?:saying|that|about|with)\s+(.+))?$/);
+    // WHATSAPP — "WhatsApp X", "WhatsApp X saying Y", "wa X"
+    const waMatch = t.match(/(?:whatsapp|wa)\s+(.+?)(?:\s+(?:saying|that|about|with|message)\s+(.+))?$/);
     if (waMatch) {
       const name = waMatch[1].trim().replace(/^(my|the|a)\s+/i, '');
-      const msg = waMatch[2] || 'your message';
-      return { intent: 'WHATSAPP', contact: name, detail: msg, message: `WhatsApp message ready for ${name.charAt(0).toUpperCase() + name.slice(1)}.`, receipt: [`To: ${name.charAt(0).toUpperCase() + name.slice(1)}`, `Message: "${msg}"`, 'Tap to send'], confidence: 0.8, needsConfirm: true };
+      const msg = waMatch[2] || '';
+      return { intent: 'WHATSAPP', name, detail: msg, message: `WhatsApp: ${name}`, receipt: [`To: ${name}`, msg ? `Message: "${msg}"` : 'Opening chat'], confidence: 0.8, needsConfirm: true };
     }
 
-    // SMS / Message — "send X to Y", "text Y", "message Y saying Z"
+    // SMS / Message — "message X", "text X", "send X to Y", "message X saying Y"
     const smsMatch = t.match(/(?:send|text|message)\s+(?:(?:a\s+)?(?:message|text)\s+)?(?:to\s+)?(.+?)(?:\s+(?:saying|that|about|with)\s+(.+))?$/);
     if (smsMatch) {
       const name = smsMatch[1].trim().replace(/^(my|the|a)\s+/i, '');
-      const msg = smsMatch[2] || 'your message';
-      return { intent: 'SMS', contact: name, detail: msg, message: `Message ready to send to ${name.charAt(0).toUpperCase() + name.slice(1)}.`, receipt: [`To: ${name.charAt(0).toUpperCase() + name.slice(1)}`, `Message: "${msg}"`, 'Tap to confirm sending'], confidence: 0.8, needsConfirm: true };
+      const msg = smsMatch[2] || '';
+      return { intent: 'SMS', name, detail: msg, message: `Message ${name}`, receipt: [`To: ${name}`, msg ? `Message: "${msg}"` : 'Opening messages'], confidence: 0.8, needsConfirm: true };
     }
 
-    // CALENDAR — "create an event", "calendar event", "schedule X"
+    // CALENDAR — "create an event", "schedule X"
     const calMatch = t.match(/(?:create|add|schedule|set)\s+(?:a\s+)?(?:calendar\s+)?(?:event|meeting|appointment)\s+(?:for\s+)?(.+?)(?:\s+(?:at|on|for)\s+(.+))?$/);
     if (calMatch) {
       const title = calMatch[1].trim();
       const time = calMatch[2] || 'tomorrow';
-      return { intent: 'CALENDAR', contact: null, detail: `${title} on ${time}`, message: `Event created: ${title} on ${time}.`, receipt: [`Event: ${title}`, `When: ${time}`, 'Added to your calendar'], confidence: 0.8, needsConfirm: false };
+      return { intent: 'CALENDAR', name: '', detail: `${title} on ${time}`, message: `Event: ${title} on ${time}`, receipt: [`Event: ${title}`, `When: ${time}`], confidence: 0.8, needsConfirm: false };
     }
 
-    // CAMERA — "open camera", "take a photo", "take a picture"
+    // WEATHER — "what's the weather", "weather in X", "temperature"
+    const weatherMatch = t.match(/(?:what(?:'s| is)\s+)?(?:the\s+)?(?:weather|temperature|forecast)(?:\s+(?:in|at|for|like)\s+(.+?))?(?:\s|$|\.|\?)/);
+    if (weatherMatch) {
+      const place = weatherMatch[1] || 'your location';
+      return { intent: 'WEATHER', name: place, detail: '', message: `Weather for ${place}`, receipt: [`Location: ${place}`, 'Opening weather'], confidence: 0.85, needsConfirm: false };
+    }
+    if (t.match(/^(?:how(?:'s| is)\s+)?(?:the\s+)?weather/)) {
+      return { intent: 'WEATHER', name: 'your location', detail: '', message: 'Weather for your location', receipt: ['Location: your location', 'Opening weather'], confidence: 0.85, needsConfirm: false };
+    }
+
+    // CAMERA — "open camera", "take a photo"
     if (t.match(/(?:open|launch|start)\s+(?:the\s+)?camera|take\s+(?:a\s+)?(?:photo|picture|selfie)/)) {
-      return { intent: 'CAMERA', contact: null, detail: '', message: 'Opening your camera.', receipt: ['Camera opening...', 'Say "capture" to take a photo'], confidence: 0.9, needsConfirm: false };
+      return { intent: 'CAMERA', name: '', detail: '', message: 'Opening camera', receipt: ['Opening camera app'], confidence: 0.9, needsConfirm: false };
     }
 
     // Unknown
@@ -436,7 +418,7 @@
   // ===== STATE MANAGEMENT =====
   let currentState = 'idle';
   let autoResetTimer = null;
-  let pendingIntent = null;  // For Tier 2 confirmation
+  let pendingIntent = null;
 
   const stateConfig = {
     idle:      { status: 'Tap to speak', action: '', showCarousel: true, showConfirm: false, showConfirmAction: false, showError: false },
@@ -459,29 +441,29 @@
     confirmCard.classList.toggle('visible', config.showConfirm);
     confirmActionCard.classList.toggle('visible', config.showConfirmAction);
     errorCard.classList.toggle('visible', config.showError);
+    actionButton.style.display = 'none';
     if (state !== 'listening') transcriptBox.classList.remove('visible', 'interim');
 
     if (state === 'done' && intentResult) {
       confirmMessage.textContent = intentResult.message;
       confirmReceipt.innerHTML = intentResult.receipt.map(r => `<div class="receipt-item">${r}</div>`).join('');
-      // Confidence badge
       const conf = intentResult.confidence || 0.9;
       let badgeClass = 'confidence-high', badgeText = 'High confidence';
       if (conf < 0.7) { badgeClass = 'confidence-low'; badgeText = 'Low confidence'; }
       else if (conf < 0.85) { badgeClass = 'confidence-med'; badgeText = 'Medium confidence'; }
       confidenceBadge.className = 'confidence-badge ' + badgeClass;
       confidenceBadge.textContent = badgeText;
-      speak(intentResult.message);
-      // Track success
-      successCount++;
-      updateCarousel();
-      // Show discovery badge after 3 successes
-      if (successCount === 3) {
-        discoveryBadge.textContent = '💡 You can also say "WhatsApp Rahul" or "Set an alarm for 6am"';
-        discoveryBadge.style.display = 'block';
-        setTimeout(() => { discoveryBadge.style.display = 'none'; }, 5000);
+
+      // Show real action button
+      const action = executeRealAction(intentResult.intent, intentResult.name, intentResult.detail);
+      if (action) {
+        actionButton.href = action.url;
+        actionButton.textContent = action.label;
+        actionButton.style.display = 'block';
       }
-      autoResetTimer = setTimeout(() => setState('idle'), 5000);
+
+      speak(intentResult.message);
+      autoResetTimer = setTimeout(() => setState('idle'), 8000);
     }
 
     if (state === 'confirm' && intentResult) {
@@ -537,7 +519,7 @@
     recognition.onerror = function(event) {
       isListening = false;
       if (event.error === 'no-speech') { setState('idle'); return; }
-      errorMessage.innerHTML = `<span class="understood">Microphone issue</span> — try saying <span class="retry">"call Rahul"</span> again`;
+      errorMessage.innerHTML = `<span class="understood">Microphone issue</span> — try again`;
       setState('error');
     };
     recognition.onend = function() {
@@ -552,36 +534,35 @@
       const intent = parseIntent(transcript);
       if (!intent) {
         const short = transcript.length > 30 ? transcript.substring(0, 30) + '...' : transcript;
-        errorMessage.innerHTML = `<span class="understood">Heard "${short}"</span> — try saying <span class="retry">"call Rahul"</span> or <span class="retry">"set a timer"</span>`;
+        errorMessage.innerHTML = `<span class="understood">Heard "${short}"</span> — try saying <span class="retry">"call Eva"</span> or <span class="retry">"message Eva"</span>`;
         setState('error');
         return;
       }
 
-      // Set action description
       const execConfig = stateConfig['executing'];
       const intentLabels = {
-        CALL: `Calling ${intent.contact}...`,
+        CALL: `Calling ${intent.name}...`,
         REMINDER: 'Setting reminder...',
         NAVIGATE: 'Opening Maps...',
         TIMER: 'Setting timer...',
         ALARM: 'Setting alarm...',
-        SMS: 'Preparing message...',
-        WHATSAPP: 'Opening WhatsApp...',
+        SMS: `Preparing message for ${intent.name}...`,
+        WHATSAPP: `Opening WhatsApp for ${intent.name}...`,
         CALENDAR: 'Creating event...',
         CAMERA: 'Opening camera...',
+        WEATHER: 'Checking weather...',
       };
       execConfig.action = intentLabels[intent.intent] || 'Executing...';
       setState('executing');
 
       setTimeout(() => {
-        // Tier 2: SMS and WhatsApp need confirmation
         if (intent.needsConfirm) {
           setState('confirm', intent);
         } else {
           setState('done', intent);
         }
-      }, 1000);
-    }, 600);
+      }, 800);
+    }, 500);
   }
 
   // ===== CONFIRM / CANCEL =====
