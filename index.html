@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>VDX — Real Prototype</title>
+<title>VDX — Voice Interface</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: #f5f5f7; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
@@ -18,7 +18,7 @@
   @keyframes pulse { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(1.6); opacity: 0; } }
   .status-text { color: #8e8e93; font-size: 15px; font-weight: 500; letter-spacing: 0.3px; min-height: 24px; transition: all 0.3s; }
   .action-desc { color: #aeaeb2; font-size: 13px; min-height: 20px; transition: all 0.3s; }
-  .transcript-box { width: 100%; max-width: 320px; background: #f5f5f7; border-radius: 12px; padding: 10px 14px; min-height: 40px; display: none; align-items: center; justify-content: center; text-align: center; color: #3a3a3c; font-size: 14px; line-height: 1.4; transition: all 0.3s; display: none; align-items: center; justify-content: center; text-align: center; }
+  .transcript-box { width: 100%; max-width: 320px; background: #f5f5f7; border-radius: 12px; padding: 10px 14px; min-height: 40px; display: none; align-items: center; justify-content: center; text-align: center; color: #3a3a3c; font-size: 14px; line-height: 1.4; transition: all 0.3s; }
   .transcript-box.visible { display: flex; }
   .transcript-box.interim { color: #aeaeb2; font-style: italic; }
   .state-idle .mic-button { background: #e8e8ed; }
@@ -99,16 +99,55 @@
   .carousel-dots { display: flex; gap: 6px; margin-top: 4px; }
   .carousel-dot { width: 6px; height: 6px; border-radius: 50%; background: #d4d4d8; transition: all 0.3s; }
   .carousel-dot.active { background: #6c3aed; width: 18px; border-radius: 3px; }
-  .discovery-badge { position: absolute; bottom: 20px; left: 20px; right: 20px; background: #f0eeff; border: 1px solid #c4b5fd; border-radius: 12px; padding: 10px 14px; color: #6c3aed; font-size: 12px; text-align: center; display: none; }
-  .browser-warning { position: absolute; bottom: 20px; left: 20px; right: 20px; background: #fef3c7; border: 1px solid #fde68a; border-radius: 10px; padding: 10px 14px; color: #92400e; font-size: 12px; text-align: center; display: none; }
   .action-button { display: inline-block; margin-top: 12px; padding: 10px 20px; border-radius: 10px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; background: #6c3aed; color: #fff; text-decoration: none; text-align: center; width: 100%; }
   .action-button:active { background: #5a2fd0; }
-  /* Number input row for unknown contacts */
   .number-input-row { margin-top: 12px; display: none; gap: 8px; width: 100%; }
   .number-input-row.visible { display: flex; }
   .number-input-row input { flex: 1; padding: 10px 14px; border: 1px solid #c4b5fd; border-radius: 10px; font-size: 14px; outline: none; }
   .number-input-row input:focus { border-color: #6c3aed; }
   .number-input-row button { padding: 10px 16px; background: #6c3aed; color: #fff; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; white-space: nowrap; }
+  .browser-warning { position: absolute; bottom: 20px; left: 20px; right: 20px; background: #fef3c7; border: 1px solid #fde68a; border-radius: 10px; padding: 10px 14px; color: #92400e; font-size: 12px; text-align: center; display: none; }
+  .onboarding { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #fff; z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 30px; text-align: center; transition: opacity 0.5s; }
+  .onboarding.hidden { opacity: 0; pointer-events: none; }
+  .onboarding h1 { font-size: 28px; color: #1a1a2e; margin-bottom: 8px; }
+  .onboarding p { color: #6b7280; font-size: 15px; line-height: 1.6; margin-bottom: 24px; }
+  .onboarding .step-dots { display: flex; gap: 8px; margin-bottom: 24px; }
+  .onboarding .step-dot { width: 8px; height: 8px; border-radius: 50%; background: #d4d4d8; transition: all 0.3s; }
+  .onboarding .step-dot.active { background: #6c3aed; width: 24px; border-radius: 4px; }
+  .onboarding .btn-primary { padding: 14px 32px; border-radius: 12px; border: none; background: #6c3aed; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; max-width: 280px; }
+  .onboarding .btn-primary:active { background: #5a2fd0; }
+  .onboarding .btn-skip { background: none; border: none; color: #aeaeb2; font-size: 14px; margin-top: 12px; cursor: pointer; }
+  .onboarding .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 320px; margin-bottom: 20px; }
+  .onboarding .feature-item { background: #f5f5f7; border-radius: 12px; padding: 14px 10px; text-align: center; }
+  .onboarding .feature-item .emoji { font-size: 24px; margin-bottom: 4px; }
+  .onboarding .feature-item .label { font-size: 12px; color: #3a3a3c; font-weight: 500; }
+  .onboarding .name-input { width: 100%; max-width: 280px; padding: 14px 16px; border: 2px solid #e5e5ea; border-radius: 12px; font-size: 16px; text-align: center; outline: none; margin-bottom: 16px; }
+  .onboarding .name-input:focus { border-color: #6c3aed; }
+  .onboarding .privacy-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; margin-bottom: 20px; text-align: left; max-width: 320px; width: 100%; }
+  .onboarding .privacy-box .title { color: #16a34a; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .onboarding .privacy-box p { color: #6b7280; font-size: 13px; margin-bottom: 0; }
+  .onboarding .privacy-box .check { color: #22c55e; }
+  .onboarding .contact-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 320px; margin-bottom: 16px; }
+  .onboarding .contact-tag { padding: 8px 16px; border-radius: 20px; border: 1px solid #e5e5ea; background: #fff; font-size: 13px; cursor: pointer; transition: all 0.2s; -webkit-tap-highlight-color: transparent; }
+  .onboarding .contact-tag.selected { background: #f0eeff; border-color: #6c3aed; color: #6c3aed; }
+  .onboarding .contact-tag:active { transform: scale(0.95); }
+  .onboarding .mic-test { width: 64px; height: 64px; border-radius: 50%; background: #e8e8ed; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; cursor: pointer; transition: all 0.3s; }
+  .onboarding .mic-test.active { background: #6c3aed; box-shadow: 0 0 20px rgba(108, 58, 237, 0.3); }
+  .onboarding .mic-test svg { width: 28px; height: 28px; color: #8e8e93; }
+  .onboarding .mic-test.active svg { color: #fff; }
+  .onboarding .test-result { font-size: 14px; color: #6b7280; min-height: 24px; margin-bottom: 16px; }
+  .onboarding .test-result.success { color: #22c55e; }
+  .onboarding .test-result.error { color: #dc2626; }
+  .onboarding .welcome-badge { font-size: 48px; margin-bottom: 16px; }
+  .onboarding .subtitle { color: #aeaeb2; font-size: 13px; margin-bottom: 24px; }
+  .onboarding .privacy-list { text-align: left; max-width: 280px; margin-bottom: 20px; }
+  .onboarding .privacy-list li { color: #6b7280; font-size: 14px; padding: 4px 0; list-style: none; }
+  .onboarding .privacy-list li::before { content: "✓ "; color: #22c55e; font-weight: bold; }
+  .onboarding .voice-preview { background: #f5f5f7; border-radius: 12px; padding: 16px; max-width: 320px; width: 100%; margin-bottom: 16px; }
+  .onboarding .voice-preview .heard { color: #aeaeb2; font-size: 13px; margin-bottom: 4px; }
+  .onboarding .voice-preview .text { color: #3a3a3c; font-size: 15px; font-weight: 500; }
+  .onboarding .voice-preview .action { color: #6c3aed; font-size: 14px; margin-top: 8px; }
+  .onboarding .voice-preview .check { color: #22c55e; font-size: 14px; margin-top: 8px; }
   @media (max-width: 480px) { .phone { width: 100%; height: 100vh; border-radius: 0; padding: 12px; } }
 </style>
 </head>
@@ -118,6 +157,12 @@
   <div class="notch"></div>
   <div class="screen">
 
+    <!-- Onboarding -->
+    <div class="onboarding" id="onboarding">
+      <div id="onboardingContent"></div>
+    </div>
+
+    <!-- Main UI -->
     <div class="bubble-container state-idle" id="bubble">
       <button class="mic-button" id="micBtn">
         <div class="pulse-ring"></div>
@@ -139,7 +184,7 @@
 
     <div class="transcript-box" id="transcriptBox"></div>
 
-    <!-- Result Card (DONE) -->
+    <!-- Result Card -->
     <div class="card confirm-card" id="confirmCard">
       <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       <div class="title">Done</div>
@@ -153,7 +198,7 @@
       </div>
     </div>
 
-    <!-- Confirmation Action Card (Tier 2) -->
+    <!-- Confirm Action Card -->
     <div class="card confirm-action-card" id="confirmActionCard">
       <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
       <div class="title">Confirm</div>
@@ -173,12 +218,10 @@
     <div class="card error-card" id="errorCard">
       <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
       <div class="title">Didn't quite get that</div>
-      <div class="message" id="errorMessage">
-        Try saying something below
-      </div>
+      <div class="message" id="errorMessage">Try saying something below</div>
     </div>
 
-    <!-- Example Carousel -->
+    <!-- Carousel -->
     <div class="carousel" id="carousel">
       <div class="carousel-label" id="carouselLabel">Try saying</div>
       <div class="carousel-example" id="carouselText">"Call Eva"</div>
@@ -214,7 +257,6 @@
   const micBtn = document.getElementById('micBtn');
   const btnConfirm = document.getElementById('btnConfirm');
   const btnCancel = document.getElementById('btnCancel');
-  const discoveryBadge = document.getElementById('discoveryBadge');
   const browserWarning = document.getElementById('browserWarning');
   const actionButton = document.getElementById('actionButton');
   const numberInputRow = document.getElementById('numberInputRow');
@@ -223,32 +265,198 @@
   const confirmNumberRow = document.getElementById('confirmNumberRow');
   const confirmNumberInput = document.getElementById('confirmNumberInput');
   const confirmNumberSaveBtn = document.getElementById('confirmNumberSaveBtn');
+  const onboarding = document.getElementById('onboarding');
+  const onboardingContent = document.getElementById('onboardingContent');
 
-  // ===== STORED CONTACTS (localStorage) =====
-  function loadContacts() {
-    try { return JSON.parse(localStorage.getItem('vdx_contacts')) || {}; } catch(e) { return {}; }
-  }
-  function saveContacts(contacts) {
-    localStorage.setItem('vdx_contacts', JSON.stringify(contacts));
-  }
-  let knownContacts = loadContacts();
+  // ===== STORAGE =====
+  function loadJSON(key, def) { try { return JSON.parse(localStorage.getItem(key)) || def; } catch(e) { return def; } }
+  function saveJSON(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+  let knownContacts = loadJSON('vdx_contacts', {});
+  let userName = localStorage.getItem('vdx_user_name') || '';
+  let onboarded = localStorage.getItem('vdx_onboarded') === 'true';
+  let pendingContactName = null;
+  let pendingContactIntent = null;
 
-  let pendingContactName = null;  // name we're collecting a number for
-  let pendingContactIntent = null; // for confirm flow
+  // ===== ONBOARDING =====
+  let onboardingStep = 0;
+  const onboardingSteps = [
+    // Step 0: Welcome
+    { render: () => `
+      <div class="welcome-badge">🎙️</div>
+      <h1>Welcome to VDX</h1>
+      <p class="subtitle">The fastest way to get things done on your phone — just speak, and it happens.</p>
+      <div class="feature-grid">
+        <div class="feature-item"><div class="emoji">📞</div><div class="label">Call anyone</div></div>
+        <div class="feature-item"><div class="emoji">💬</div><div class="label">Send messages</div></div>
+        <div class="feature-item"><div class="emoji">📍</div><div class="label">Navigate</div></div>
+        <div class="feature-item"><div class="emoji">🌐</div><div class="label">Search web</div></div>
+        <div class="feature-item"><div class="emoji">🎵</div><div class="label">Play media</div></div>
+        <div class="feature-item"><div class="emoji">📸</div><div class="label">Camera & OCR</div></div>
+        <div class="feature-item"><div class="emoji">⏰</div><div class="label">Timers & alarms</div></div>
+        <div class="feature-item"><div class="emoji">🚕</div><div class="label">Book a cab</div></div>
+      </div>
+      <button class="btn-primary" onclick="nextOnboardingStep()">Get Started</button>
+    `},
+    // Step 1: Your name
+    { render: () => `
+      <div class="welcome-badge">👋</div>
+      <h1>What should I call you?</h1>
+      <p>So I can personalise everything for you.</p>
+      <input class="name-input" id="onboardName" value="${userName}" placeholder="Your name..." maxlength="30">
+      <button class="btn-primary" onclick="saveOnboardingName()">Continue</button>
+      <button class="btn-skip" onclick="nextOnboardingStep()">Skip</button>
+    `},
+    // Step 2: Privacy promise
+    { render: () => `
+      <div class="welcome-badge">🔒</div>
+      <h1>Your privacy comes first</h1>
+      <div class="privacy-box">
+        <div class="title">What VDX does with your data</div>
+        <ul class="privacy-list">
+          <li>Your voice never leaves your device</li>
+          <li>No recordings are stored anywhere</li>
+          <li>Contacts stay on your phone</li>
+          <li>No ads. No tracking. No selling data.</li>
+          <li>You can delete everything anytime</li>
+        </ul>
+      </div>
+      <button class="btn-primary" onclick="nextOnboardingStep()">I'm in</button>
+    `},
+    // Step 3: Add contacts
+    { render: () => `
+      <div class="welcome-badge">📇</div>
+      <h1>Who do you call most?</h1>
+      <p>Tap the people you contact often — I'll remember them.</p>
+      <div class="contact-tags" id="contactTags">
+        ${['Eva', 'Mom', 'Dad', 'Rahul', 'Priya', 'Vikram', 'Ananya', 'Boss'].map(n => `
+          <div class="contact-tag${knownContacts[n.toLowerCase()] ? ' selected' : ''}" onclick="toggleContact('${n}')">${n}</div>
+        `).join('')}
+      </div>
+      <button class="btn-primary" onclick="nextOnboardingStep()">Continue</button>
+      <button class="btn-skip" onclick="nextOnboardingStep()">Skip</button>
+    `},
+    // Step 4: Mic test
+    { render: () => `
+      <div class="welcome-badge">🎤</div>
+      <h1>Let's test your mic</h1>
+      <p>Tap the mic and say something like "call Eva"</p>
+      <div class="mic-test" id="micTestBtn" onclick="startOnboardingMicTest()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </div>
+      <div class="test-result" id="micTestResult">Tap the mic to test</div>
+      <button class="btn-primary" id="onboardFinishBtn" onclick="finishOnboarding()" style="display:none;">Start using VDX</button>
+      <button class="btn-skip" onclick="finishOnboarding()">Skip test</button>
+    `},
+  ];
+
+  function renderOnboarding() {
+    const step = onboardingSteps[onboardingStep];
+    if (!step) { finishOnboarding(); return; }
+    onboardingContent.innerHTML = step.render();
+    // Add step dots
+    const dots = document.createElement('div');
+    dots.className = 'step-dots';
+    dots.innerHTML = onboardingSteps.map((_, i) =>
+      `<div class="step-dot${i === onboardingStep ? ' active' : ''}"></div>`
+    ).join('');
+    onboardingContent.insertBefore(dots, onboardingContent.firstChild);
+  }
+
+  function nextOnboardingStep() {
+    onboardingStep++;
+    renderOnboarding();
+  }
+
+  function saveOnboardingName() {
+    const name = document.getElementById('onboardName').value.trim();
+    if (name) { userName = name; localStorage.setItem('vdx_user_name', name); }
+    nextOnboardingStep();
+  }
+
+  function toggleContact(name) {
+    const key = name.toLowerCase();
+    if (knownContacts[key]) {
+      delete knownContacts[key];
+    } else {
+      knownContacts[key] = '';
+    }
+    saveJSON('vdx_contacts', knownContacts);
+    // Re-render contact tags
+    const container = document.getElementById('contactTags');
+    if (container) {
+      container.innerHTML = ['Eva', 'Mom', 'Dad', 'Rahul', 'Priya', 'Vikram', 'Ananya', 'Boss']
+        .map(n => `<div class="contact-tag${knownContacts[n.toLowerCase()] ? ' selected' : ''}" onclick="toggleContact('${n}')">${n}</div>`).join('');
+    }
+  }
+
+  let onboardingRecognition = null;
+  function startOnboardingMicTest() {
+    const btn = document.getElementById('micTestBtn');
+    const result = document.getElementById('micTestResult');
+    const finishBtn = document.getElementById('onboardFinishBtn');
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      result.className = 'test-result error';
+      result.textContent = 'Speech not available on this browser';
+      finishBtn.style.display = 'block';
+      return;
+    }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    onboardingRecognition = new SR();
+    onboardingRecognition.lang = 'en-US';
+    onboardingRecognition.interimResults = true;
+    onboardingRecognition.maxAlternatives = 1;
+
+    btn.classList.add('active');
+    result.className = 'test-result';
+    result.textContent = 'Listening...';
+
+    onboardingRecognition.onresult = (e) => {
+      let final = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      }
+      if (final) {
+        result.className = 'test-result success';
+        result.textContent = `Heard: "${final}" ✓`;
+        finishBtn.style.display = 'block';
+        btn.classList.remove('active');
+        onboardingRecognition.stop();
+      }
+    };
+    onboardingRecognition.onerror = () => {
+      result.className = 'test-result error';
+      result.textContent = 'Mic issue — tap to try again';
+      btn.classList.remove('active');
+    };
+    onboardingRecognition.onend = () => {
+      btn.classList.remove('active');
+    };
+    try { onboardingRecognition.start(); } catch(e) {}
+  }
+
+  function finishOnboarding() {
+    localStorage.setItem('vdx_onboarded', 'true');
+    onboarded = true;
+    onboarding.classList.add('hidden');
+    setTimeout(() => { onboarding.style.display = 'none'; }, 500);
+    speak(`Welcome${userName ? ' ' + userName : ''}! Tap the mic and tell me what to do.`);
+  }
 
   // ===== EXAMPLES =====
   const allExamples = [
-    '"Call Eva"',
-    '"Message Eva"',
-    '"WhatsApp Eva"',
-    '"Navigate to Apollo Pharmacy"',
-    '"Set a timer for 10 minutes"',
-    '"What\'s the weather in Mumbai"',
-    '"What\'s on my calendar today"',
-    '"Open camera"',
-    '"Set an alarm for 6am"',
+    '"Call Eva"', '"Message Eva"', '"WhatsApp Eva"',
+    '"Navigate to Apollo Pharmacy"', '"Set a timer for 10 minutes"',
+    '"What\'s the weather in Mumbai"', '"What\'s on my calendar today"',
+    '"Open camera"', '"Set an alarm for 6am"',
+    '"Search the web for news"', '"Play some music"',
+    '"Read my document"', '"Describe this image"',
+    '"Book a cab"', '"Turn on flashlight"',
   ];
-
   let exampleIndex = 0;
 
   function updateCarousel() {
@@ -261,7 +469,6 @@
       carouselDots.appendChild(dot);
     }
   }
-
   function nextExample() {
     exampleIndex = (exampleIndex + 1) % allExamples.length;
     carouselText.textContent = allExamples[exampleIndex];
@@ -280,8 +487,7 @@
     utterance.volume = 1.0;
     const voices = window.speechSynthesis.getVoices();
     const preferred = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google UK'))
-      || voices.find(v => v.lang.startsWith('en'))
-      || null;
+      || voices.find(v => v.lang.startsWith('en')) || null;
     if (preferred) utterance.voice = preferred;
     window.speechSynthesis.speak(utterance);
   }
@@ -294,7 +500,6 @@
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recognition = null;
   let isListening = false;
-
   if (SpeechRecognition) {
     recognition = new SpeechRecognition();
     recognition.continuous = false;
@@ -321,7 +526,6 @@
       confirmNumberInput.focus();
     }
   }
-
   function saveNumber() {
     const input = numberInputRow.classList.contains('visible') ? numberInput : confirmNumberInput;
     const name = pendingContactName;
@@ -329,8 +533,7 @@
     const number = input.value.trim();
     if (!number) return;
     knownContacts[name.toLowerCase()] = number;
-    saveContacts(knownContacts);
-    // Re-execute the pending action with the number
+    saveJSON('vdx_contacts', knownContacts);
     const intent = pendingContactIntent;
     pendingContactName = null;
     pendingContactIntent = null;
@@ -338,7 +541,6 @@
     confirmNumberRow.style.display = 'none';
     executeAndShow(intent);
   }
-
   numberSaveBtn.addEventListener('click', saveNumber);
   confirmNumberSaveBtn.addEventListener('click', saveNumber);
   numberInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveNumber(); });
@@ -347,81 +549,43 @@
   // ===== REAL EXECUTION ENGINE =====
   function executeRealAction(intent, name, detail) {
     const encoded = encodeURIComponent(name);
-    const encodedDetail = encodeURIComponent(detail || '');
     const key = name.toLowerCase();
     const number = knownContacts[key];
-
     switch (intent) {
-      case 'CALL':
-        if (number) return { url: `tel:${number}`, label: 'Open Dialer' };
-        // No number on web — show number input
-        return null;
-
-      case 'SMS':
-        if (number) {
-          const body = detail ? `?body=${encodeURIComponent(detail)}` : '';
-          return { url: `sms:${number}${body}`, label: 'Open Messages' };
-        }
-        return null;
-
-      case 'WHATSAPP':
-        if (number) {
-          const clean = number.replace(/[\s+\-]/g, '');
-          if (detail) {
-            return { url: `https://wa.me/${clean}?text=${encodeURIComponent(detail)}`, label: 'Open WhatsApp Chat' };
-          }
-          return { url: `https://wa.me/${clean}`, label: 'Open WhatsApp Chat' };
-        }
-        return null;
-
-      case 'NAVIGATE':
-        return { url: `https://maps.google.com/?q=${encoded}`, label: 'Open Maps' };
-
-      case 'TIMER':
-        return { url: `intent://timer#Intent;action=android.intent.action.VIEW;package=com.google.android.deskclock;end`, label: 'Open Clock' };
-
-      case 'ALARM':
-        return { url: `intent://alarm#Intent;action=android.intent.action.VIEW;package=com.google.android.deskclock;end`, label: 'Open Clock' };
-
-      case 'WEATHER':
-        return { url: `https://www.google.com/search?q=weather+${encoded}`, label: 'Check Weather' };
-
-      case 'CAMERA':
-        return { url: `intent://camera#Intent;action=android.media.action.STILL_IMAGE_CAMERA;end`, label: 'Open Camera' };
-
-      case 'CALENDAR':
-        return { url: `intent://calendar#Intent;action=android.intent.action.VIEW;package=com.google.android.calendar;end`, label: 'Open Calendar' };
-
-      case 'REMINDER':
-        return { url: `intent://reminder#Intent;action=android.intent.action.VIEW;package=com.google.android.apps.tasks;end`, label: 'Open Tasks' };
-
-      case 'CALENDAR_QUERY':
-        // Can't read calendar from web, open it and let user see
-        return { url: `intent://calendar#Intent;action=android.intent.action.VIEW;package=com.google.android.calendar;end`, label: 'Open Calendar' };
-
-      default:
-        return null;
+      case 'CALL': return number ? { url: `tel:${number}`, label: 'Open Dialer' } : null;
+      case 'SMS': return number ? { url: `sms:${number}${detail ? '?body=' + encodeURIComponent(detail) : ''}`, label: 'Open Messages' } : null;
+      case 'WHATSAPP': return number ? { url: `https://wa.me/${number.replace(/[\s+\-]/g, '')}${detail ? '?text=' + encodeURIComponent(detail) : ''}`, label: 'Open WhatsApp Chat' } : null;
+      case 'NAVIGATE': return { url: `https://maps.google.com/?q=${encoded}`, label: 'Open Maps' };
+      case 'TIMER': return { url: `https://www.google.com/search?q=timer+${encodeURIComponent(detail)}`, label: 'Set Timer' };
+      case 'ALARM': return { url: `https://www.google.com/search?q=set+alarm+for+${encodeURIComponent(detail)}`, label: 'Set Alarm' };
+      case 'WEATHER': return { url: `https://www.google.com/search?q=weather+${encoded}`, label: 'Check Weather' };
+      case 'CAMERA': return null; // Can't open camera from web
+      case 'CALENDAR': return { url: `https://calendar.google.com/calendar/r/eventedit`, label: 'Open Calendar' };
+      case 'CALENDAR_QUERY': return { url: `https://calendar.google.com/calendar/r`, label: 'Open Calendar' };
+      case 'SEARCH_WEB': return { url: `https://www.google.com/search?q=${encodeURIComponent(detail || name)}`, label: 'Search Web' };
+      case 'PLAY_MEDIA': return { url: `https://www.youtube.com/results?search_query=${encodeURIComponent(detail || name)}`, label: 'Search YouTube' };
+      case 'BOOK_CAB': return { url: `https://www.uber.com/`, label: 'Open Uber' };
+      case 'FLASHLIGHT': return null;
+      case 'READ_DOCUMENT': return null;
+      case 'DESCRIBE_IMAGE': return null;
+      case 'AUDIO_MESSAGE': return null;
+      default: return null;
     }
   }
+  function needsNumber(name) { return name && !knownContacts[name.toLowerCase()]; }
 
-  function needsNumber(name) {
-    const key = name.toLowerCase();
-    return !knownContacts[key];
-  }
-
-  // ===== INTENT PARSER (works with ANY name) =====
+  // ===== INTENT PARSER (Louie-level features) =====
   function parseIntent(transcript) {
     const t = transcript.toLowerCase().trim();
 
-    // CALENDAR QUERY — "what's on my calendar", "what's my today's calendar look like", "show my calendar", "my schedule today"
+    // CALENDAR QUERY
     if (t.match(/what(?:(?:'s| is)\s+)?(?:on|in|my)\s+(?:my\s+)?(?:today(?:'s)?\s+)?(?:calendar|schedule|agenda|events?|plans?)/) ||
         t.match(/show\s+(?:me\s+)?(?:my\s+)?(?:today(?:'s)?\s+)?(?:calendar|schedule|agenda|events?|plans?)/) ||
-        t.match(/what(?:'s| is)\s+(?:my\s+)?(?:schedule|agenda|plan)\s+(?:for\s+)?(?:today|tomorrow)/) ||
         t.match(/do\s+(?:i\s+)?have\s+(?:any\s+)?(?:events?|plans?|meetings?)\s+(?:for\s+)?(?:today|tomorrow)/)) {
       return { intent: 'CALENDAR_QUERY', name: '', detail: '', message: 'Opening your calendar', receipt: ['Showing today\'s events', 'Open calendar app to view'], confidence: 0.85, needsConfirm: false };
     }
 
-    // CALL — "call X", "ring X", "phone X", "dial X"
+    // CALL
     const callMatch = t.match(/(?:call|ring|phone|dial)\s+(?:my\s+)?(.+?)(?:\s+(?:on\s+)?(mobile|phone|work|home|office))?(?:\s|$|\.)/);
     if (callMatch) {
       const name = callMatch[1].trim().replace(/^(the|a|an)\s+/i, '');
@@ -429,7 +593,7 @@
       return { intent: 'CALL', name: capitalize(name), detail: phoneType, message: `Calling ${capitalize(name)}...`, receipt: [`Open dialer for ${capitalize(name)}`, needsNumber(name) ? 'Need phone number' : `Phone: ${phoneType}`], confidence: 0.9, needsConfirm: false };
     }
 
-    // REMINDER — "remind me to X", "set a reminder"
+    // REMINDER
     const remindMatch = t.match(/(?:remind|reminder|set\s+(?:a\s+)?reminder)\s+(?:me\s+)?(?:to\s+)?(.+?)(?:\s+(?:at|in|by|for|about)\s+(.+))?$/);
     if (remindMatch) {
       const task = remindMatch[1].trim().replace(/^(to|about)\s+/i, '');
@@ -437,31 +601,27 @@
       return { intent: 'REMINDER', name: '', detail: `${task} at ${time}`, message: `Reminder: ${task} at ${time}`, receipt: [`Task: ${task}`, `Time: ${time}`], confidence: 0.85, needsConfirm: false };
     }
 
-    // NAVIGATE — "navigate to X", "take me to X", "go to X", "directions to X"
+    // NAVIGATE
     const navMatch = t.match(/(?:navigate|take\s+(?:me\s+)?to|go\s+to|drive\s+to|directions\s+to|find|show\s+(?:me\s+)?(?:the\s+)?way\s+to)\s+(.+?)$/);
     if (navMatch) {
       const place = navMatch[1].trim().replace(/^(the|a|an)\s+/i, '');
       return { intent: 'NAVIGATE', name: place, detail: '', message: `Navigating to ${capitalize(place)}`, receipt: [`Destination: ${capitalize(place)}`, 'Opening Maps'], confidence: 0.9, needsConfirm: false };
     }
 
-    // TIMER — "set a timer for X", "X minutes"
+    // TIMER
     const timerMatch = t.match(/(?:set\s+(?:a|an)\s+)?timer\s+(?:for\s+)?(.+?)$/);
-    if (timerMatch) {
-      return { intent: 'TIMER', name: '', detail: timerMatch[1].trim(), message: `Timer set for ${timerMatch[1].trim()}`, receipt: [`Duration: ${timerMatch[1].trim()}`], confidence: 0.9, needsConfirm: false };
-    }
+    if (timerMatch) return { intent: 'TIMER', name: '', detail: timerMatch[1].trim(), message: `Timer set for ${timerMatch[1].trim()}`, receipt: [`Duration: ${timerMatch[1].trim()}`], confidence: 0.9, needsConfirm: false };
     const durationMatch = t.match(/^(.+?)\s+(minutes|seconds|mins|secs)\s*$/);
-    if (durationMatch) {
-      return { intent: 'TIMER', name: '', detail: `${durationMatch[1]} ${durationMatch[2]}`, message: `Timer set for ${durationMatch[1]} ${durationMatch[2]}`, receipt: [`Duration: ${durationMatch[1]} ${durationMatch[2]}`], confidence: 0.85, needsConfirm: false };
-    }
+    if (durationMatch) return { intent: 'TIMER', name: '', detail: `${durationMatch[1]} ${durationMatch[2]}`, message: `Timer set for ${durationMatch[1]} ${durationMatch[2]}`, receipt: [`Duration: ${durationMatch[1]} ${durationMatch[2]}`], confidence: 0.85, needsConfirm: false };
 
-    // ALARM — "set an alarm for X", "wake me up at X"
+    // ALARM
     const alarmMatch = t.match(/(?:set\s+(?:an\s+)?|create\s+(?:an\s+)?)?alarm\s+(?:for\s+)?(.+?)$|wake\s+(?:me\s+)?up\s+(?:at\s+)?(.+?)$/);
     if (alarmMatch) {
       const time = alarmMatch[1] || alarmMatch[2] || 'morning';
       return { intent: 'ALARM', name: '', detail: time, message: `Alarm set for ${time}`, receipt: [`Time: ${time}`], confidence: 0.85, needsConfirm: false };
     }
 
-    // WHATSAPP — "WhatsApp X", "WhatsApp X saying Y"
+    // WHATSAPP
     const waMatch = t.match(/(?:whatsapp|wa)\s+(.+?)(?:\s+(?:saying|that|about|with|message)\s+(.+))?$/);
     if (waMatch) {
       const name = waMatch[1].trim().replace(/^(my|the|a)\s+/i, '');
@@ -469,7 +629,7 @@
       return { intent: 'WHATSAPP', name: capitalize(name), detail: msg, message: `WhatsApp: ${capitalize(name)}`, receipt: [`To: ${capitalize(name)}`, msg ? `Message: "${msg}"` : 'Opening chat'], confidence: 0.8, needsConfirm: true };
     }
 
-    // SMS / Message — "message X", "text X", "send X to Y"
+    // SMS
     const smsMatch = t.match(/(?:send|text|message)\s+(?:(?:a\s+)?(?:message|text)\s+)?(?:to\s+)?(.+?)(?:\s+(?:saying|that|about|with)\s+(.+))?$/);
     if (smsMatch) {
       const name = smsMatch[1].trim().replace(/^(my|the|a)\s+/i, '');
@@ -477,7 +637,7 @@
       return { intent: 'SMS', name: capitalize(name), detail: msg, message: `Message ${capitalize(name)}`, receipt: [`To: ${capitalize(name)}`, msg ? `Message: "${msg}"` : 'Opening messages'], confidence: 0.8, needsConfirm: true };
     }
 
-    // CALENDAR — "create an event", "schedule X", "create a meeting"
+    // CALENDAR
     const calMatch = t.match(/(?:create|add|schedule|set)\s+(?:a\s+)?(?:calendar\s+)?(?:event|meeting|appointment)\s+(?:for\s+)?(.+?)(?:\s+(?:at|on|for)\s+(.+))?$/);
     if (calMatch) {
       const title = calMatch[1].trim();
@@ -485,29 +645,71 @@
       return { intent: 'CALENDAR', name: '', detail: `${title} on ${time}`, message: `Event: ${title} on ${time}`, receipt: [`Event: ${title}`, `When: ${time}`], confidence: 0.8, needsConfirm: false };
     }
 
-    // WEATHER — "what's the weather", "weather in X"
+    // WEATHER
     const weatherMatch = t.match(/(?:what(?:'s| is)\s+)?(?:the\s+)?(?:weather|temperature|forecast)(?:\s+(?:in|at|for|like)\s+(.+?))?(?:\s|$|\.|\?)/);
     if (weatherMatch) {
       const place = weatherMatch[1] || 'your location';
       return { intent: 'WEATHER', name: place, detail: '', message: `Weather for ${capitalize(place)}`, receipt: [`Location: ${capitalize(place)}`, 'Opening weather'], confidence: 0.85, needsConfirm: false };
     }
-    if (t.match(/^(?:how(?:'s| is)\s+)?(?:the\s+)?weather/)) {
-      return { intent: 'WEATHER', name: 'your location', detail: '', message: 'Weather for your location', receipt: ['Location: your location', 'Opening weather'], confidence: 0.85, needsConfirm: false };
-    }
 
-    // CAMERA — "open camera", "take a photo", "take a picture"
+    // CAMERA
     if (t.match(/(?:open|launch|start)\s+(?:the\s+)?camera|take\s+(?:a\s+)?(?:photo|picture|selfie)/)) {
       return { intent: 'CAMERA', name: '', detail: '', message: 'Opening camera', receipt: ['Opening camera app'], confidence: 0.9, needsConfirm: false };
+    }
+
+    // ===== LOUIE-LEVEL FEATURES =====
+
+    // SEARCH WEB — "search the web for X", "search for X", "google X", "look up X"
+    const searchMatch = t.match(/(?:search\s+(?:the\s+)?(?:web\s+)?(?:for\s+)?|google\s+|look\s+up\s+|find\s+(?:info|information|about)\s+)(.+?)$/);
+    if (searchMatch) {
+      const query = searchMatch[1].trim();
+      return { intent: 'SEARCH_WEB', name: query, detail: query, message: `Searching for "${query}"`, receipt: [`Query: ${query}`, 'Opening search results'], confidence: 0.9, needsConfirm: false };
+    }
+    // Also catch "what is X", "who is X", "where is X" as web search
+    const qaMatch = t.match(/^(?:what|who|where|when|why|how)\s+(?:is|are|was|were|does|do|can|will)\s+(.+?)$/);
+    if (qaMatch && !t.match(/weather|calendar|schedule|temperature/)) {
+      const query = qaMatch[1].trim();
+      return { intent: 'SEARCH_WEB', name: query, detail: query, message: `Searching for "${query}"`, receipt: [`Query: ${query}`, 'Opening search results'], confidence: 0.8, needsConfirm: false };
+    }
+
+    // PLAY MEDIA — "play music", "play some music", "play songs", "play video", "play [song name]"
+    const playMatch = t.match(/(?:play|listen\s+to|watch)\s+(.+?)$/);
+    if (playMatch) {
+      const media = playMatch[1].trim();
+      return { intent: 'PLAY_MEDIA', name: media, detail: media, message: `Playing "${capitalize(media)}"`, receipt: [`Searching for: ${capitalize(media)}`, 'Opening media player'], confidence: 0.85, needsConfirm: false };
+    }
+
+    // BOOK CAB — "book a cab", "book a taxi", "book an Uber", "get a ride", "call a cab"
+    if (t.match(/book\s+(?:a|an|me)\s+(?:cab|taxi|uber|ride|car)|get\s+(?:a|me\s+a)\s+(?:cab|taxi|uber|ride)|call\s+(?:a|me\s+a)\s+(?:cab|taxi|uber)/)) {
+      return { intent: 'BOOK_CAB', name: '', detail: '', message: 'Booking a cab', receipt: ['Opening Uber', 'Finding nearby cabs'], confidence: 0.85, needsConfirm: false };
+    }
+
+    // FLASHLIGHT — "turn on flashlight", "turn off flashlight", "flashlight on", "flashlight off"
+    if (t.match(/flashlight|torch|flash\s+light/)) {
+      const state = t.match(/on|enable|start/) ? 'on' : (t.match(/off|disable|stop/) ? 'off' : 'on');
+      return { intent: 'FLASHLIGHT', name: '', detail: state, message: `Flashlight turned ${state}`, receipt: [`Flashlight: ${state}`], confidence: 0.9, needsConfirm: false };
+    }
+
+    // READ DOCUMENT — "read my document", "read PDF", "read this document", "read aloud"
+    if (t.match(/read\s+(?:my\s+)?(?:document|pdf|file|this|aloud|out\s+loud)/)) {
+      return { intent: 'READ_DOCUMENT', name: '', detail: '', message: 'Ready to read a document', receipt: ['Select a document to read', 'I\'ll read it aloud'], confidence: 0.8, needsConfirm: false };
+    }
+
+    // DESCRIBE IMAGE / OCR — "describe this image", "read text from image", "OCR this", "what's in this image"
+    if (t.match(/describe\s+(?:this\s+)?(?:image|picture|photo)|read\s+(?:text\s+)?(?:from\s+)?(?:this\s+)?image|ocr|what(?:'s| is)\s+(?:in|on)\s+(?:this\s+)?(?:image|picture|photo)/)) {
+      return { intent: 'DESCRIBE_IMAGE', name: '', detail: '', message: 'Analyzing image', receipt: ['Select an image', 'I\'ll describe what I see'], confidence: 0.8, needsConfirm: false };
+    }
+
+    // AUDIO MESSAGE — "send audio message", "record audio", "send voice message"
+    if (t.match(/audio\s+message|voice\s+message|record\s+(?:an?\s+)?(?:audio|voice)/)) {
+      return { intent: 'AUDIO_MESSAGE', name: '', detail: '', message: 'Ready to record audio', receipt: ['Recording audio message', 'Tap to send'], confidence: 0.8, needsConfirm: false };
     }
 
     // Unknown
     return null;
   }
 
-  function capitalize(s) {
-    if (!s) return s;
-    return s.charAt(0).toUpperCase() + s.slice(1);
-  }
+  function capitalize(s) { if (!s) return s; return s.charAt(0).toUpperCase() + s.slice(1); }
 
   // ===== STATE MANAGEMENT =====
   let currentState = 'idle';
@@ -550,14 +752,12 @@
       confidenceBadge.className = 'confidence-badge ' + badgeClass;
       confidenceBadge.textContent = badgeText;
 
-      // Check if this intent needs a number
       if ((intentResult.intent === 'CALL' || intentResult.intent === 'SMS' || intentResult.intent === 'WHATSAPP') && intentResult.name && needsNumber(intentResult.name)) {
         showNumberInput(intentResult.name, intentResult.intent, intentResult.detail);
         actionButton.style.display = 'none';
       } else {
         executeAndShow(intentResult);
       }
-
       speak(intentResult.message);
       autoResetTimer = setTimeout(() => setState('idle'), 10000);
     }
@@ -566,7 +766,6 @@
       pendingIntent = intentResult;
       confirmActionMessage.textContent = intentResult.message;
       confirmActionReceipt.innerHTML = intentResult.receipt.map(r => `<div class="receipt-item">${r}</div>`).join('');
-      // Check if needs number
       if ((intentResult.intent === 'WHATSAPP' || intentResult.intent === 'SMS') && intentResult.name && needsNumber(intentResult.name)) {
         confirmNumberRow.style.display = 'flex';
         confirmNumberInput.placeholder = `Enter ${intentResult.name}'s number...`;
@@ -576,8 +775,7 @@
     }
 
     if (state === 'error') {
-      const errMsg = document.getElementById('errorMessage');
-      speak(errMsg.textContent || errMsg.innerText);
+      speak(errorMessage.textContent || errorMessage.innerText);
       autoResetTimer = setTimeout(() => setState('idle'), 5000);
     }
   }
@@ -605,7 +803,6 @@
     transcriptBox.classList.add('visible', 'interim');
     try { recognition.start(); } catch (e) {}
   }
-
   function stopListening() {
     if (!recognition || !isListening) return;
     isListening = false;
@@ -616,9 +813,8 @@
     recognition.onresult = function(event) {
       let finalTranscript = '', interimTranscript = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const result = event.results[i];
-        if (result.isFinal) finalTranscript += result[0].transcript;
-        else interimTranscript += result[0].transcript;
+        if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+        else interimTranscript += event.results[i][0].transcript;
       }
       if (interimTranscript) { transcriptBox.textContent = `"${interimTranscript}"`; transcriptBox.classList.add('interim'); }
       if (finalTranscript) {
@@ -647,14 +843,16 @@
         const short = transcript.length > 30 ? transcript.substring(0, 30) + '...' : transcript;
         errorMessage.innerHTML = `
           <span class="understood">Heard "${short}"</span><br><br>
-          I can do any of these:<br>
-          <span class="retry">📞 "call Rahul"</span><br>
-          <span class="retry">⏰ "set a timer for 10 minutes"</span><br>
-          <span class="retry">🔔 "remind me to buy milk at 5"</span><br>
-          <span class="retry">📍 "navigate to Apollo Pharmacy"</span><br>
+          I can do all of these:<br>
+          <span class="retry">📞 "call Eva"</span><br>
           <span class="retry">💬 "text Mom saying I'm on my way"</span><br>
-          <span class="retry">📸 "open camera"</span><br>
-          <span class="retry">📅 "create an event for tomorrow at 3"</span>
+          <span class="retry">🌐 "search the web for news"</span><br>
+          <span class="retry">🎵 "play some music"</span><br>
+          <span class="retry">📍 "navigate to Apollo Pharmacy"</span><br>
+          <span class="retry">📸 "describe this image"</span><br>
+          <span class="retry">📄 "read my document"</span><br>
+          <span class="retry">🚕 "book a cab"</span><br>
+          <span class="retry">🔦 "turn on flashlight"</span>
         `;
         setState('error');
         return;
@@ -662,27 +860,20 @@
 
       const execConfig = stateConfig['executing'];
       const intentLabels = {
-        CALL: `Calling ${intent.name}...`,
-        REMINDER: 'Setting reminder...',
-        NAVIGATE: 'Opening Maps...',
-        TIMER: 'Setting timer...',
-        ALARM: 'Setting alarm...',
-        SMS: `Preparing message for ${intent.name}...`,
-        WHATSAPP: `Opening WhatsApp for ${intent.name}...`,
-        CALENDAR: 'Creating event...',
-        CALENDAR_QUERY: 'Opening calendar...',
-        CAMERA: 'Opening camera...',
-        WEATHER: 'Checking weather...',
+        CALL: `Calling ${intent.name}...`, REMINDER: 'Setting reminder...', NAVIGATE: 'Opening Maps...',
+        TIMER: 'Setting timer...', ALARM: 'Setting alarm...', SMS: `Preparing message for ${intent.name}...`,
+        WHATSAPP: `Opening WhatsApp for ${intent.name}...`, CALENDAR: 'Creating event...',
+        CALENDAR_QUERY: 'Opening calendar...', CAMERA: 'Opening camera...', WEATHER: 'Checking weather...',
+        SEARCH_WEB: 'Searching the web...', PLAY_MEDIA: 'Searching for media...', BOOK_CAB: 'Booking a cab...',
+        FLASHLIGHT: 'Toggling flashlight...', READ_DOCUMENT: 'Preparing to read...',
+        DESCRIBE_IMAGE: 'Analyzing image...', AUDIO_MESSAGE: 'Preparing to record...',
       };
       execConfig.action = intentLabels[intent.intent] || 'Executing...';
       setState('executing');
 
       setTimeout(() => {
-        if (intent.needsConfirm) {
-          setState('confirm', intent);
-        } else {
-          setState('done', intent);
-        }
+        if (intent.needsConfirm) setState('confirm', intent);
+        else setState('done', intent);
       }, 800);
     }, 500);
   }
@@ -690,17 +881,11 @@
   // ===== CONFIRM / CANCEL =====
   btnConfirm.addEventListener('click', () => {
     if (pendingIntent) {
-      // If still needs a number, don't proceed
       if ((pendingIntent.intent === 'WHATSAPP' || pendingIntent.intent === 'SMS') && pendingIntent.name && needsNumber(pendingIntent.name) && !confirmNumberInput.value.trim()) {
-        confirmNumberInput.focus();
-        return;
+        confirmNumberInput.focus(); return;
       }
-      // Save number if entered
       const num = confirmNumberInput.value.trim();
-      if (num && pendingIntent.name) {
-        knownContacts[pendingIntent.name.toLowerCase()] = num;
-        saveContacts(knownContacts);
-      }
+      if (num && pendingIntent.name) { knownContacts[pendingIntent.name.toLowerCase()] = num; saveJSON('vdx_contacts', knownContacts); }
       setState('done', pendingIntent);
       pendingIntent = null;
     }
@@ -728,13 +913,18 @@
     transcriptBox.classList.remove('interim');
     handleTranscript(text);
   });
-
   setInterval(nextExample, 4000);
 
   // ===== INIT =====
   updateCarousel();
-  setState('idle');
+  if (!onboarded) {
+    onboarding.style.display = 'flex';
+    renderOnboarding();
+    setState('idle');
+  } else {
+    onboarding.style.display = 'none';
+    setState('idle');
+  }
 </script>
-
 </body>
 </html>
