@@ -552,14 +552,14 @@
     browserWarning.style.display = 'block';
   }
 
-  // --- Intent Parser (keyword-based, no API needed) ---
+  // --- Intent Parser (flexible keyword-based) ---
   function parseIntent(transcript) {
     const t = transcript.toLowerCase().trim();
 
-    // CALL
-    const callMatch = t.match(/call\s+(.+?)(?:\s+(mobile|phone|work|home))?$/);
+    // CALL — any sentence with "call" followed by a name
+    const callMatch = t.match(/(?:call|ring|phone|dial)\s+(.+?)(?:\s+(mobile|phone|work|home|office))?(?:\s|$|\.)/);
     if (callMatch) {
-      const name = callMatch[1].trim();
+      const name = callMatch[1].trim().replace(/^(my|the|a|an)\s+/i, '');
       const type = callMatch[2] || 'mobile';
       return {
         intent: 'CALL',
@@ -573,10 +573,10 @@
       };
     }
 
-    // REMINDER
-    const remindMatch = t.match(/remind\s+(?:me\s+)?(?:to\s+)?(.+?)(?:\s+(?:at|in|by|for)\s+(.+))?$/);
+    // REMINDER — "remind me to X", "remind me X at Y", "set a reminder for X"
+    const remindMatch = t.match(/(?:remind|reminder|set\s+(?:a\s+)?reminder)\s+(?:me\s+)?(?:to\s+)?(.+?)(?:\s+(?:at|in|by|for|about)\s+(.+))?$/);
     if (remindMatch) {
-      const task = remindMatch[1].trim();
+      const task = remindMatch[1].trim().replace(/^(to|about)\s+/i, '');
       const time = remindMatch[2] || 'now';
       return {
         intent: 'REMINDER',
@@ -590,10 +590,10 @@
       };
     }
 
-    // NAVIGATE
-    const navMatch = t.match(/(?:navigate|take me|go|drive|directions)\s+(?:to\s+)?(.+?)$/);
+    // NAVIGATE — "navigate to X", "take me to X", "go to X", "directions to X", "find X"
+    const navMatch = t.match(/(?:navigate|take\s+(?:me\s+)?to|go\s+to|drive\s+to|directions\s+to|find|show\s+(?:me\s+)?(?:the\s+)?way\s+to)\s+(.+?)$/);
     if (navMatch) {
-      const place = navMatch[1].trim();
+      const place = navMatch[1].trim().replace(/^(the|a|an)\s+/i, '');
       return {
         intent: 'NAVIGATE',
         contact: null,
@@ -606,7 +606,7 @@
       };
     }
 
-    // TIMER
+    // TIMER — "set a timer for X", "timer X minutes", "set timer X"
     const timerMatch = t.match(/(?:set\s+(?:a|an)\s+)?timer\s+(?:for\s+)?(.+?)$/);
     if (timerMatch) {
       const duration = timerMatch[1].trim();
@@ -622,10 +622,27 @@
       };
     }
 
-    // SMS / Message
-    const smsMatch = t.match(/(?:send|text|message)\s+(?:a\s+)?(?:message\s+)?(?:to\s+)?(.+?)(?:\s+(?:saying|that|about)\s+(.+))?$/);
+    // Also catch "X minutes" or "X seconds" as timer intent
+    const durationMatch = t.match(/^(.+?)\s+(minutes|seconds|mins|secs)\s*$/);
+    if (durationMatch) {
+      const num = durationMatch[1].trim();
+      const unit = durationMatch[2];
+      return {
+        intent: 'TIMER',
+        contact: null,
+        detail: `${num} ${unit}`,
+        message: `Timer set for ${num} ${unit}.`,
+        receipt: [
+          `Timer: ${num} ${unit}`,
+          'You\'ll be notified when time\'s up'
+        ]
+      };
+    }
+
+    // SMS / Message — "send X to Y", "text Y", "message Y saying Z"
+    const smsMatch = t.match(/(?:send|text|message)\s+(?:(?:a\s+)?(?:message|text)\s+)?(?:to\s+)?(.+?)(?:\s+(?:saying|that|about|with)\s+(.+))?$/);
     if (smsMatch) {
-      const name = smsMatch[1].trim();
+      const name = smsMatch[1].trim().replace(/^(my|the|a)\s+/i, '');
       const msg = smsMatch[2] || 'your message';
       return {
         intent: 'SMS',
