@@ -515,6 +515,29 @@
   let recognition = null;
   let isListening = false;
   let autoResetTimer = null;
+  let ttsEnabled = true;
+
+  // --- Speech Synthesis (Talkback) ---
+  function speak(text) {
+    if (!ttsEnabled) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    // Try to find a good voice
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google UK')) 
+      || voices.find(v => v.lang.startsWith('en')) 
+      || null;
+    if (preferred) utterance.voice = preferred;
+    window.speechSynthesis.speak(utterance);
+  }
+  // Pre-load voices (they load async)
+  if (window.speechSynthesis) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
+  }
 
   // --- Speech Recognition ---
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -648,11 +671,16 @@
       confirmReceipt.innerHTML = intentResult.receipt.map(r =>
         `<div class="receipt-item">${r}</div>`
       ).join('');
+      // Speak the confirmation
+      speak(intentResult.message);
       // Auto-reset after 5s
       autoResetTimer = setTimeout(() => setState('idle'), 5000);
     }
 
     if (state === 'error') {
+      // Speak the error message
+      const errMsg = document.getElementById('errorMessage');
+      speak(errMsg.textContent || errMsg.innerText);
       // Auto-reset after 5s
       autoResetTimer = setTimeout(() => setState('idle'), 5000);
     }
