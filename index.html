@@ -3,407 +3,111 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>VDX — Speak & See</title>
+<title>VDX — Full Prototype</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: #f5f5f7;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
-
-  .phone {
-    width: 390px;
-    height: 844px;
-    background: #ffffff;
-    border-radius: 44px;
-    padding: 20px;
-    position: relative;
-    box-shadow: 0 0 0 1px rgba(0,0,0,0.04), 0 20px 60px rgba(0,0,0,0.08);
-    overflow: hidden;
-  }
-
-  .notch {
-    width: 160px;
-    height: 30px;
-    background: #1a1a2e;
-    border-radius: 0 0 20px 20px;
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
-  }
-
-  .screen {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    padding-top: 30px;
-  }
-
-  .bubble-container {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  .mic-button {
-    width: 88px;
-    height: 88px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    background: #e8e8ed;
-    z-index: 2;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .mic-button:active {
-    transform: scale(0.92);
-  }
-
-  .mic-icon {
-    width: 36px;
-    height: 36px;
-    color: #8e8e93;
-    transition: all 0.3s;
-  }
-
-  .pulse-ring {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 2px solid rgba(108, 58, 237, 0.3);
-    animation: none;
-    pointer-events: none;
-  }
-
-  @keyframes pulse {
-    0% { transform: scale(1); opacity: 0.6; }
-    100% { transform: scale(1.6); opacity: 0; }
-  }
-
-  .status-text {
-    color: #8e8e93;
-    font-size: 15px;
-    font-weight: 500;
-    letter-spacing: 0.3px;
-    min-height: 24px;
-    transition: all 0.3s;
-  }
-
-  .action-desc {
-    color: #aeaeb2;
-    font-size: 13px;
-    min-height: 20px;
-    transition: all 0.3s;
-  }
-
-  /* Transcript display */
-  .transcript-box {
-    width: 100%;
-    max-width: 320px;
-    background: #f5f5f7;
-    border-radius: 12px;
-    padding: 12px 16px;
-    min-height: 44px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: #3a3a3c;
-    font-size: 15px;
-    line-height: 1.4;
-    transition: all 0.3s;
-  }
+  body { background: #f5f5f7; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  .phone { width: 390px; height: 844px; background: #ffffff; border-radius: 44px; padding: 20px; position: relative; box-shadow: 0 0 0 1px rgba(0,0,0,0.04), 0 20px 60px rgba(0,0,0,0.08); overflow: hidden; }
+  .notch { width: 160px; height: 30px; background: #1a1a2e; border-radius: 0 0 20px 20px; position: absolute; top: 0; left: 50%; transform: translateX(-50%); z-index: 100; }
+  .screen { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding-top: 30px; }
+  .bubble-container { position: relative; display: flex; flex-direction: column; align-items: center; gap: 12px; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .mic-button { width: 88px; height: 88px; border-radius: 50%; border: none; cursor: pointer; position: relative; display: flex; align-items: center; justify-content: center; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); background: #e8e8ed; z-index: 2; -webkit-tap-highlight-color: transparent; }
+  .mic-button:active { transform: scale(0.92); }
+  .mic-icon { width: 36px; height: 36px; color: #8e8e93; transition: all 0.3s; }
+  .pulse-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 2px solid rgba(108, 58, 237, 0.3); animation: none; pointer-events: none; }
+  @keyframes pulse { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(1.6); opacity: 0; } }
+  .status-text { color: #8e8e93; font-size: 15px; font-weight: 500; letter-spacing: 0.3px; min-height: 24px; transition: all 0.3s; }
+  .action-desc { color: #aeaeb2; font-size: 13px; min-height: 20px; transition: all 0.3s; }
+  .transcript-box { width: 100%; max-width: 320px; background: #f5f5f7; border-radius: 12px; padding: 10px 14px; min-height: 40px; display: none; align-items: center; justify-content: center; text-align: center; color: #3a3a3c; font-size: 14px; line-height: 1.4; transition: all 0.3s; }
   .transcript-box.visible { display: flex; }
   .transcript-box.interim { color: #aeaeb2; font-style: italic; }
-
-  /* IDLE */
   .state-idle .mic-button { background: #e8e8ed; }
   .state-idle .mic-icon { color: #8e8e93; }
   .state-idle .pulse-ring { animation: none; opacity: 0; }
-
-  /* LISTENING */
-  .state-listening .mic-button {
-    background: #6c3aed;
-    box-shadow: 0 0 30px rgba(108, 58, 237, 0.3);
-  }
+  .state-listening .mic-button { background: #6c3aed; box-shadow: 0 0 30px rgba(108, 58, 237, 0.3); }
   .state-listening .mic-icon { color: #fff; }
   .state-listening .pulse-ring { animation: pulse 1.5s ease-out infinite; }
   .state-listening .status-text { color: #6c3aed; }
-
-  /* THINKING */
-  .state-thinking .mic-button {
-    background: #e8e8ed;
-    border: 2px solid #6c3aed;
-  }
+  .state-thinking .mic-button { background: #e8e8ed; border: 2px solid #6c3aed; }
   .state-thinking .mic-icon { color: #6c3aed; }
   .state-thinking .status-text { color: #6c3aed; }
-
-  .spinner {
-    width: 24px;
-    height: 24px;
-    border: 2.5px solid rgba(108, 58, 237, 0.2);
-    border-top-color: #6c3aed;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    display: none;
-  }
+  .spinner { width: 24px; height: 24px; border: 2.5px solid rgba(108, 58, 237, 0.2); border-top-color: #6c3aed; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
   .state-thinking .spinner { display: block; }
   .state-thinking .mic-icon { display: none; }
-
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* EXECUTING */
-  .state-executing .mic-button {
-    background: linear-gradient(135deg, #6c3aed, #4a1db8);
-  }
+  .state-executing .mic-button { background: linear-gradient(135deg, #6c3aed, #4a1db8); }
   .state-executing .mic-icon { color: #fff; }
   .state-executing .status-text { color: #6c3aed; }
-
-  .progress-ring {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    border-top-color: rgba(108, 58, 237, 0.4);
-    animation: spin 0.6s linear infinite;
-    pointer-events: none;
-  }
+  .progress-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 2px solid transparent; border-top-color: rgba(108, 58, 237, 0.4); animation: spin 0.6s linear infinite; pointer-events: none; }
   .state-executing .progress-ring { display: block; }
   .state-executing .pulse-ring { display: none; }
-
-  /* DONE */
-  .state-done .mic-button {
-    background: #22c55e;
-    box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
-  }
+  .state-done .mic-button { background: #22c55e; box-shadow: 0 0 30px rgba(34, 197, 94, 0.3); }
   .state-done .mic-icon { color: #fff; }
   .state-done .status-text { color: #22c55e; }
-
-  .checkmark {
-    width: 28px;
-    height: 28px;
-    display: none;
-  }
+  .checkmark { width: 28px; height: 28px; display: none; }
   .state-done .checkmark { display: block; }
   .state-done .mic-icon { display: none; }
-
-  /* ERROR */
-  .state-error .mic-button {
-    background: #f59e0b;
-    box-shadow: 0 0 30px rgba(245, 158, 11, 0.3);
-  }
+  .state-error .mic-button { background: #f59e0b; box-shadow: 0 0 30px rgba(245, 158, 11, 0.3); }
   .state-error .mic-icon { color: #fff; }
   .state-error .status-text { color: #f59e0b; }
-
-  .confirmation-card {
-    width: 100%;
-    max-width: 320px;
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
-    border-radius: 16px;
-    padding: 20px;
-    display: none;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  .confirmation-card.visible {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .confirmation-card .icon {
-    width: 32px;
-    height: 32px;
-    background: #dcfce7;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 12px;
-  }
-  .confirmation-card .icon svg { width: 18px; height: 18px; color: #22c55e; }
-  .confirmation-card .title {
-    color: #16a34a;
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-  }
-  .confirmation-card .message {
-    color: #1a1a2e;
-    font-size: 16px;
-    line-height: 1.5;
-    font-weight: 500;
-  }
-  .confirmation-card .receipt {
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid #e5e5e5;
-  }
-  .confirmation-card .receipt-item {
-    color: #6b7280;
-    font-size: 13px;
-    padding: 3px 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .confirmation-card .receipt-item::before {
-    content: "✓";
-    color: #22c55e;
-    font-weight: bold;
-  }
-
-  .error-card {
-    width: 100%;
-    max-width: 320px;
-    background: #fffbeb;
-    border: 1px solid #fde68a;
-    border-radius: 16px;
-    padding: 20px;
-    display: none;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  .error-card.visible {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .error-card .icon {
-    width: 32px;
-    height: 32px;
-    background: #fef3c7;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 12px;
-  }
-  .error-card .icon svg { width: 18px; height: 18px; color: #f59e0b; }
-  .error-card .title {
-    color: #d97706;
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-  }
-  .error-card .message {
-    color: #1a1a2e;
-    font-size: 14px;
-    line-height: 1.5;
-  }
-  .error-card .message .understood {
-    color: #6b7280;
-  }
-  .error-card .message .retry {
-    color: #d97706;
-    font-weight: 500;
-  }
-
-  .carousel {
-    width: 100%;
-    max-width: 320px;
-    margin-top: 24px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    transition: opacity 0.3s;
-  }
+  .state-confirm .mic-button { background: #6c3aed; box-shadow: 0 0 30px rgba(108, 58, 237, 0.3); }
+  .state-confirm .mic-icon { color: #fff; }
+  .state-confirm .status-text { color: #6c3aed; }
+  .state-confirm .pulse-ring { animation: pulse 1.5s ease-out infinite; }
+  .card { width: 100%; max-width: 320px; border-radius: 16px; padding: 20px; display: none; opacity: 0; transform: translateY(10px); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .card.visible { display: block; opacity: 1; transform: translateY(0); }
+  .card .icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+  .card .icon svg { width: 18px; height: 18px; }
+  .card .title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .card .message { font-size: 16px; line-height: 1.5; font-weight: 500; }
+  .card .receipt { margin-top: 14px; padding-top: 14px; border-top: 1px solid #e5e5e5; }
+  .card .receipt-item { font-size: 13px; padding: 3px 0; display: flex; align-items: center; gap: 8px; }
+  .card .receipt-item::before { content: "✓"; font-weight: bold; }
+  .card .receipt-item.pending::before { content: "○"; color: #d4d4d8; }
+  .card .receipt-item.pending { color: #aeaeb2; }
+  .confirm-card { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .confirm-card .icon { background: #dcfce7; }
+  .confirm-card .icon svg { color: #22c55e; }
+  .confirm-card .title { color: #16a34a; }
+  .confirm-card .message { color: #1a1a2e; }
+  .confirm-card .receipt-item::before { color: #22c55e; }
+  .error-card { background: #fffbeb; border: 1px solid #fde68a; }
+  .error-card .icon { background: #fef3c7; }
+  .error-card .icon svg { color: #f59e0b; }
+  .error-card .title { color: #d97706; }
+  .error-card .message { font-size: 14px; line-height: 1.5; }
+  .error-card .message .understood { color: #6b7280; }
+  .error-card .message .retry { color: #d97706; font-weight: 500; }
+  .confirm-action-card { background: #f0eeff; border: 1px solid #c4b5fd; }
+  .confirm-action-card .icon { background: #ede9fe; }
+  .confirm-action-card .icon svg { color: #6c3aed; }
+  .confirm-action-card .title { color: #6c3aed; }
+  .confirm-action-card .message { color: #1a1a2e; }
+  .confirm-action-card .actions { display: flex; gap: 8px; margin-top: 14px; }
+  .confirm-action-card .actions button { flex: 1; padding: 10px; border-radius: 10px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .confirm-action-card .actions .btn-confirm { background: #6c3aed; color: #fff; }
+  .confirm-action-card .actions .btn-cancel { background: #f5f5f7; color: #6b7280; }
+  .confidence-badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; margin-top: 8px; }
+  .confidence-high { background: #dcfce7; color: #16a34a; }
+  .confidence-med { background: #fef3c7; color: #d97706; }
+  .confidence-low { background: #fee2e2; color: #dc2626; }
+  .carousel { width: 100%; max-width: 320px; margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: opacity 0.3s; }
   .carousel.hidden { opacity: 0; pointer-events: none; }
-
-  .carousel-label {
-    color: #aeaeb2;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 4px;
-  }
-
-  .carousel-example {
-    background: #f5f5f7;
-    border: 1px solid #e5e5ea;
-    border-radius: 12px;
-    padding: 12px 20px;
-    color: #3a3a3c;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s;
-    text-align: center;
-    width: 100%;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .carousel-example:active {
-    background: #f0eeff;
-    border-color: #c4b5fd;
-  }
-
-  .carousel-dots {
-    display: flex;
-    gap: 6px;
-    margin-top: 4px;
-  }
-  .carousel-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #d4d4d8;
-    transition: all 0.3s;
-  }
+  .carousel-label { color: #aeaeb2; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; }
+  .carousel-example { background: #f5f5f7; border: 1px solid #e5e5ea; border-radius: 12px; padding: 12px 20px; color: #3a3a3c; font-size: 14px; cursor: pointer; transition: all 0.3s; text-align: center; width: 100%; -webkit-tap-highlight-color: transparent; }
+  .carousel-example:active { background: #f0eeff; border-color: #c4b5fd; }
+  .carousel-dots { display: flex; gap: 6px; margin-top: 4px; }
+  .carousel-dot { width: 6px; height: 6px; border-radius: 50%; background: #d4d4d8; transition: all 0.3s; }
   .carousel-dot.active { background: #6c3aed; width: 18px; border-radius: 3px; }
-
-  .browser-warning {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    right: 20px;
-    background: #fef3c7;
-    border: 1px solid #fde68a;
-    border-radius: 10px;
-    padding: 10px 14px;
-    color: #92400e;
-    font-size: 12px;
-    text-align: center;
-    display: none;
-  }
-
-  @media (max-width: 480px) {
-    .phone { width: 100%; height: 100vh; border-radius: 0; padding: 12px; }
-  }
+  .discovery-badge { position: absolute; bottom: 20px; left: 20px; right: 20px; background: #f0eeff; border: 1px solid #c4b5fd; border-radius: 12px; padding: 10px 14px; color: #6c3aed; font-size: 12px; text-align: center; display: none; }
+  .browser-warning { position: absolute; bottom: 20px; left: 20px; right: 20px; background: #fef3c7; border: 1px solid #fde68a; border-radius: 10px; padding: 10px 14px; color: #92400e; font-size: 12px; text-align: center; display: none; }
+  @media (max-width: 480px) { .phone { width: 100%; height: 100vh; border-radius: 0; padding: 12px; } }
 </style>
 </head>
 <body>
 
 <div class="phone">
   <div class="notch"></div>
-
   <div class="screen">
 
     <div class="bubble-container state-idle" id="bubble">
@@ -421,126 +125,207 @@
           <polyline points="20 6 9 17 4 12"/>
         </svg>
       </button>
-
       <div class="status-text" id="statusText">Tap to speak</div>
       <div class="action-desc" id="actionDesc"></div>
     </div>
 
-    <!-- Live transcript -->
     <div class="transcript-box" id="transcriptBox"></div>
 
-    <!-- Confirmation Card -->
-    <div class="confirmation-card" id="confirmCard">
-      <div class="icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
-      </div>
+    <!-- Confirmation Card (DONE) -->
+    <div class="card confirm-card" id="confirmCard">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       <div class="title">Done</div>
       <div class="message" id="confirmMessage">Rahul's phone is now ringing.</div>
-      <div class="receipt" id="confirmReceipt">
-        <div class="receipt-item">Rahul matched from contacts</div>
-        <div class="receipt-item">Calling mobile number</div>
+      <div class="receipt" id="confirmReceipt"></div>
+      <div class="confidence-badge" id="confidenceBadge"></div>
+    </div>
+
+    <!-- Confirmation Action Card (Tier 2 — needs user to confirm) -->
+    <div class="card confirm-action-card" id="confirmActionCard">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+      <div class="title">Confirm</div>
+      <div class="message" id="confirmActionMessage">Send message to Mom?</div>
+      <div class="receipt" id="confirmActionReceipt"></div>
+      <div class="actions">
+        <button class="btn-confirm" id="btnConfirm">✓ Confirm</button>
+        <button class="btn-cancel" id="btnCancel">✕ Cancel</button>
       </div>
     </div>
 
     <!-- Error Card -->
-    <div class="error-card" id="errorCard">
-      <div class="icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-      </div>
+    <div class="card error-card" id="errorCard">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
       <div class="title">Didn't quite get that</div>
       <div class="message" id="errorMessage">
-        <span class="understood">Heard "call Rahul"</span> — try saying <span class="retry">"call Rahul mobile"</span> to specify the number
+        <span class="understood">Heard "call Rahul"</span> — try saying <span class="retry">"call Rahul mobile"</span>
       </div>
     </div>
 
     <!-- Example Carousel -->
     <div class="carousel" id="carousel">
-      <div class="carousel-label">Try saying</div>
+      <div class="carousel-label" id="carouselLabel">Try saying</div>
       <div class="carousel-example" id="carouselText">"Remind me to call Rahul at 9pm"</div>
-      <div class="carousel-dots">
-        <div class="carousel-dot active"></div>
-        <div class="carousel-dot"></div>
-        <div class="carousel-dot"></div>
-      </div>
+      <div class="carousel-dots" id="carouselDots"></div>
     </div>
 
+    <!-- Discovery badge -->
+    <div class="discovery-badge" id="discoveryBadge"></div>
+
     <div class="browser-warning" id="browserWarning">
-      ⚠️ Speech recognition not available on this browser. Try Chrome on Android or desktop.
+      ⚠️ Speech recognition not available. Try Chrome on Android.
     </div>
 
   </div>
 </div>
 
 <script>
+  // ===== DOM REFS =====
   const bubble = document.getElementById('bubble');
   const statusText = document.getElementById('statusText');
   const actionDesc = document.getElementById('actionDesc');
   const confirmCard = document.getElementById('confirmCard');
+  const confirmActionCard = document.getElementById('confirmActionCard');
   const errorCard = document.getElementById('errorCard');
   const carousel = document.getElementById('carousel');
   const carouselText = document.getElementById('carouselText');
+  const carouselLabel = document.getElementById('carouselLabel');
+  const carouselDots = document.getElementById('carouselDots');
   const transcriptBox = document.getElementById('transcriptBox');
   const confirmMessage = document.getElementById('confirmMessage');
   const confirmReceipt = document.getElementById('confirmReceipt');
+  const confirmActionMessage = document.getElementById('confirmActionMessage');
+  const confirmActionReceipt = document.getElementById('confirmActionReceipt');
   const errorMessage = document.getElementById('errorMessage');
+  const confidenceBadge = document.getElementById('confidenceBadge');
   const micBtn = document.getElementById('micBtn');
+  const btnConfirm = document.getElementById('btnConfirm');
+  const btnCancel = document.getElementById('btnCancel');
+  const discoveryBadge = document.getElementById('discoveryBadge');
   const browserWarning = document.getElementById('browserWarning');
 
-  const examples = [
-    '"Remind me to call Rahul at 9pm"',
-    '"Navigate to Apollo Pharmacy"',
-    '"Set a timer for 10 minutes"',
-    '"Send a message to Mom"',
-    '"Call Rahul"',
-    '"What\'s the weather today?"',
+  // ===== CONTACTS DATABASE (simulated) =====
+  const contacts = [
+    { name: 'Rahul', phones: { mobile: '+91-9876543210', work: '+91-1122334455' } },
+    { name: 'Mom', phones: { mobile: '+91-9988776655' } },
+    { name: 'Rahul Sharma', phones: { mobile: '+91-9876543210' } },
+    { name: 'Rahul Kumar', phones: { mobile: '+91-5566778899' } },
+    { name: 'Priya', phones: { mobile: '+91-8877665544' } },
+    { name: 'Apollo Pharmacy', phones: { mobile: '+91-1800-123-456' } },
+    { name: 'Ananya', phones: { mobile: '+91-7766554433' } },
+    { name: 'Vikram', phones: { mobile: '+91-6655443322' } },
   ];
 
-  const stateConfig = {
-    idle:     { status: 'Tap to speak', action: '', showCarousel: true, showConfirm: false, showError: false },
-    listening:{ status: 'Listening...', action: '', showCarousel: false, showConfirm: false, showError: false },
-    thinking: { status: 'On it...', action: '', showCarousel: false, showConfirm: false, showError: false },
-    executing:{ status: '', action: '', showCarousel: false, showConfirm: false, showError: false },
-    done:     { status: 'Done', action: '', showCarousel: false, showConfirm: true, showError: false },
-    error:    { status: 'Didn\'t quite get that', action: '', showCarousel: false, showConfirm: false, showError: true },
+  // ===== PREFERENCES (learned over time) =====
+  let preferences = {
+    frequentContacts: {},  // name -> count
+    lastUsed: {},          // name -> {phoneType, time}
   };
 
-  let currentState = 'idle';
-  let exampleIndex = 0;
-  let recognition = null;
-  let isListening = false;
-  let autoResetTimer = null;
-  let ttsEnabled = true;
+  function learnPreference(name, phoneType) {
+    const key = name.toLowerCase();
+    preferences.frequentContacts[key] = (preferences.frequentContacts[key] || 0) + 1;
+    preferences.lastUsed[key] = { phoneType, time: Date.now() };
+  }
 
-  // --- Speech Synthesis (Talkback) ---
+  function getPreferredPhone(name) {
+    const key = name.toLowerCase();
+    const pref = preferences.lastUsed[key];
+    if (pref && pref.phoneType) return pref.phoneType;
+    return 'mobile';
+  }
+
+  // ===== CONTACT RESOLUTION (fuzzy match) =====
+  function resolveContact(name) {
+    const q = name.toLowerCase().trim();
+    const matches = contacts.filter(c => c.name.toLowerCase().includes(q) || q.includes(c.name.toLowerCase()));
+    if (matches.length === 0) return { status: 'not_found', name };
+    if (matches.length === 1) return { status: 'found', contact: matches[0] };
+    if (matches.length <= 3) return { status: 'ambiguous', matches, name };
+    return { status: 'too_many', name };
+  }
+
+  // ===== EXAMPLES (progressive disclosure) =====
+  const allExamples = {
+    basic: [
+      '"Call Rahul"',
+      '"Set a timer for 10 minutes"',
+      '"Navigate to Apollo Pharmacy"',
+    ],
+    intermediate: [
+      '"Remind me to call Rahul at 9pm"',
+      '"Send a message to Mom"',
+      '"Text Priya saying I\'m on my way"',
+    ],
+    advanced: [
+      '"Set an alarm for 6am"',
+      '"Open the camera"',
+      '"WhatsApp Rahul"',
+      '"Create a calendar event for tomorrow at 3pm"',
+      '"Call Rahul on work"',
+    ],
+  };
+
+  let unlockedLevel = 'basic';
+  let successCount = 0;
+  let exampleIndex = 0;
+  let currentExamples = allExamples.basic;
+
+  function getExamples() {
+    if (successCount >= 5) return [...allExamples.basic, ...allExamples.intermediate, ...allExamples.advanced];
+    if (successCount >= 2) return [...allExamples.basic, ...allExamples.intermediate];
+    return allExamples.basic;
+  }
+
+  function updateCarousel() {
+    currentExamples = getExamples();
+    if (currentExamples.length === 0) return;
+    exampleIndex = exampleIndex % currentExamples.length;
+    carouselText.textContent = currentExamples[exampleIndex];
+    const dotCount = Math.min(currentExamples.length, 5);
+    carouselDots.innerHTML = '';
+    for (let i = 0; i < dotCount; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'carousel-dot' + (i === exampleIndex % dotCount ? ' active' : '');
+      carouselDots.appendChild(dot);
+    }
+    // Update label based on unlocked level
+    if (successCount >= 5) carouselLabel.textContent = 'Try anything';
+    else if (successCount >= 2) carouselLabel.textContent = 'You\'re getting it';
+    else carouselLabel.textContent = 'Try saying';
+  }
+
+  function nextExample() {
+    exampleIndex = (exampleIndex + 1) % currentExamples.length;
+    carouselText.textContent = currentExamples[exampleIndex];
+    const dotCount = Math.min(currentExamples.length, 5);
+    document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+      dot.classList.toggle('active', i === exampleIndex % dotCount);
+    });
+  }
+
+  // ===== SPEECH SYNTHESIS =====
   function speak(text) {
-    if (!ttsEnabled) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 0.95;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
-    // Try to find a good voice
     const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google UK')) 
-      || voices.find(v => v.lang.startsWith('en')) 
+    const preferred = voices.find(v => v.lang.startsWith('en') && v.name.includes('Google UK'))
+      || voices.find(v => v.lang.startsWith('en'))
       || null;
     if (preferred) utterance.voice = preferred;
     window.speechSynthesis.speak(utterance);
   }
-  // Pre-load voices (they load async)
   if (window.speechSynthesis) {
     window.speechSynthesis.getVoices();
     window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
   }
 
-  // --- Speech Recognition ---
+  // ===== SPEECH RECOGNITION =====
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  let isListening = false;
 
   if (SpeechRecognition) {
     recognition = new SpeechRecognition();
@@ -552,91 +337,75 @@
     browserWarning.style.display = 'block';
   }
 
-  // --- Intent Parser (flexible keyword-based) ---
+  // ===== INTENT PARSER (full VDX capabilities) =====
   function parseIntent(transcript) {
     const t = transcript.toLowerCase().trim();
 
-    // CALL — any sentence with "call" followed by a name
-    const callMatch = t.match(/(?:call|ring|phone|dial)\s+(.+?)(?:\s+(mobile|phone|work|home|office))?(?:\s|$|\.)/);
+    // CALL — "call X", "ring X", "phone X", "dial X", "I need to call X"
+    const callMatch = t.match(/(?:call|ring|phone|dial)\s+(?:my\s+)?(.+?)(?:\s+(mobile|phone|work|home|office))?(?:\s|$|\.)/);
     if (callMatch) {
-      const name = callMatch[1].trim().replace(/^(my|the|a|an)\s+/i, '');
-      const type = callMatch[2] || 'mobile';
-      return {
-        intent: 'CALL',
-        contact: name,
-        detail: type,
-        message: `${name.charAt(0).toUpperCase() + name.slice(1)}'s phone is now ringing.`,
-        receipt: [
-          `${name.charAt(0).toUpperCase() + name.slice(1)} matched from contacts`,
-          `Calling ${type} number`
-        ]
-      };
+      const name = callMatch[1].trim().replace(/^(the|a|an)\s+/i, '');
+      const phoneType = callMatch[2] || getPreferredPhone(name);
+      const resolved = resolveContact(name);
+      let message, receipt;
+      if (resolved.status === 'found') {
+        const contact = resolved.contact;
+        learnPreference(contact.name, phoneType);
+        message = `${contact.name}'s phone is now ringing.`;
+        receipt = [`${contact.name} matched from contacts`, `Calling ${phoneType} number`];
+      } else if (resolved.status === 'ambiguous') {
+        const names = resolved.matches.map(c => c.name).join(' or ');
+        message = `Did you mean ${names}?`;
+        receipt = [`Multiple matches for "${name}"`, `Say the full name`];
+        return { intent: 'CALL', contact: name, detail: phoneType, message, receipt, confidence: 0.6, needsConfirm: true };
+      } else {
+        message = `Calling ${name}...`;
+        receipt = [`Contact "${name}" not in your list`, `Calling anyway`];
+      }
+      return { intent: 'CALL', contact: name, detail: phoneType, message, receipt, confidence: 0.9, needsConfirm: false };
     }
 
-    // REMINDER — "remind me to X", "remind me X at Y", "set a reminder for X"
+    // REMINDER — "remind me to X", "remind me X at Y", "set a reminder"
     const remindMatch = t.match(/(?:remind|reminder|set\s+(?:a\s+)?reminder)\s+(?:me\s+)?(?:to\s+)?(.+?)(?:\s+(?:at|in|by|for|about)\s+(.+))?$/);
     if (remindMatch) {
       const task = remindMatch[1].trim().replace(/^(to|about)\s+/i, '');
       const time = remindMatch[2] || 'now';
-      return {
-        intent: 'REMINDER',
-        contact: null,
-        detail: `${task} at ${time}`,
-        message: `You'll be reminded to ${task} at ${time}.`,
-        receipt: [
-          `Reminder set for ${time}`,
-          `Task: ${task}`
-        ]
-      };
+      return { intent: 'REMINDER', contact: null, detail: `${task} at ${time}`, message: `You'll be reminded to ${task} at ${time}.`, receipt: [`Reminder set for ${time}`, `Task: ${task}`], confidence: 0.85, needsConfirm: false };
     }
 
-    // NAVIGATE — "navigate to X", "take me to X", "go to X", "directions to X", "find X"
+    // NAVIGATE — "navigate to X", "take me to X", "go to X", "find X", "directions to X"
     const navMatch = t.match(/(?:navigate|take\s+(?:me\s+)?to|go\s+to|drive\s+to|directions\s+to|find|show\s+(?:me\s+)?(?:the\s+)?way\s+to)\s+(.+?)$/);
     if (navMatch) {
       const place = navMatch[1].trim().replace(/^(the|a|an)\s+/i, '');
-      return {
-        intent: 'NAVIGATE',
-        contact: null,
-        detail: place,
-        message: `Maps is taking you to ${place.charAt(0).toUpperCase() + place.slice(1)}.`,
-        receipt: [
-          `Destination: ${place.charAt(0).toUpperCase() + place.slice(1)}`,
-          'Best route calculated'
-        ]
-      };
+      return { intent: 'NAVIGATE', contact: null, detail: place, message: `Maps is taking you to ${place.charAt(0).toUpperCase() + place.slice(1)}.`, receipt: [`Destination: ${place.charAt(0).toUpperCase() + place.slice(1)}`, 'Best route calculated'], confidence: 0.9, needsConfirm: false };
     }
 
-    // TIMER — "set a timer for X", "timer X minutes", "set timer X"
+    // TIMER — "set a timer for X", "timer X minutes", "X minute timer"
     const timerMatch = t.match(/(?:set\s+(?:a|an)\s+)?timer\s+(?:for\s+)?(.+?)$/);
     if (timerMatch) {
       const duration = timerMatch[1].trim();
-      return {
-        intent: 'TIMER',
-        contact: null,
-        detail: duration,
-        message: `Timer set for ${duration}.`,
-        receipt: [
-          `Timer: ${duration}`,
-          'You\'ll be notified when time\'s up'
-        ]
-      };
+      return { intent: 'TIMER', contact: null, detail: duration, message: `Timer set for ${duration}.`, receipt: [`Timer: ${duration}`, "You'll be notified when time's up"], confidence: 0.9, needsConfirm: false };
     }
-
-    // Also catch "X minutes" or "X seconds" as timer intent
     const durationMatch = t.match(/^(.+?)\s+(minutes|seconds|mins|secs)\s*$/);
     if (durationMatch) {
       const num = durationMatch[1].trim();
       const unit = durationMatch[2];
-      return {
-        intent: 'TIMER',
-        contact: null,
-        detail: `${num} ${unit}`,
-        message: `Timer set for ${num} ${unit}.`,
-        receipt: [
-          `Timer: ${num} ${unit}`,
-          'You\'ll be notified when time\'s up'
-        ]
-      };
+      return { intent: 'TIMER', contact: null, detail: `${num} ${unit}`, message: `Timer set for ${num} ${unit}.`, receipt: [`Timer: ${num} ${unit}`, "You'll be notified when time's up"], confidence: 0.85, needsConfirm: false };
+    }
+
+    // ALARM — "set an alarm for X", "wake me up at X", "alarm at X"
+    const alarmMatch = t.match(/(?:set\s+(?:an\s+)?|create\s+(?:an\s+)?)?alarm\s+(?:for\s+)?(.+?)$|wake\s+(?:me\s+)?up\s+(?:at\s+)?(.+?)$/);
+    if (alarmMatch) {
+      const time = alarmMatch[1] || alarmMatch[2] || 'morning';
+      return { intent: 'ALARM', contact: null, detail: time, message: `Alarm set for ${time}.`, receipt: [`Alarm: ${time}`, 'You\'ll be woken up'], confidence: 0.85, needsConfirm: false };
+    }
+
+    // WHATSAPP — "WhatsApp X", "WhatsApp X saying Y"
+    const waMatch = t.match(/(?:whatsapp|wa)\s+(.+?)(?:\s+(?:saying|that|about|with)\s+(.+))?$/);
+    if (waMatch) {
+      const name = waMatch[1].trim().replace(/^(my|the|a)\s+/i, '');
+      const msg = waMatch[2] || 'your message';
+      return { intent: 'WHATSAPP', contact: name, detail: msg, message: `WhatsApp message ready for ${name.charAt(0).toUpperCase() + name.slice(1)}.`, receipt: [`To: ${name.charAt(0).toUpperCase() + name.slice(1)}`, `Message: "${msg}"`, 'Tap to send'], confidence: 0.8, needsConfirm: true };
     }
 
     // SMS / Message — "send X to Y", "text Y", "message Y saying Z"
@@ -644,87 +413,104 @@
     if (smsMatch) {
       const name = smsMatch[1].trim().replace(/^(my|the|a)\s+/i, '');
       const msg = smsMatch[2] || 'your message';
-      return {
-        intent: 'SMS',
-        contact: name,
-        detail: msg,
-        message: `Message ready to send to ${name.charAt(0).toUpperCase() + name.slice(1)}.`,
-        receipt: [
-          `To: ${name.charAt(0).toUpperCase() + name.slice(1)}`,
-          `Message: "${msg}"`,
-          'Tap to confirm sending'
-        ]
-      };
+      return { intent: 'SMS', contact: name, detail: msg, message: `Message ready to send to ${name.charAt(0).toUpperCase() + name.slice(1)}.`, receipt: [`To: ${name.charAt(0).toUpperCase() + name.slice(1)}`, `Message: "${msg}"`, 'Tap to confirm sending'], confidence: 0.8, needsConfirm: true };
+    }
+
+    // CALENDAR — "create an event", "calendar event", "schedule X"
+    const calMatch = t.match(/(?:create|add|schedule|set)\s+(?:a\s+)?(?:calendar\s+)?(?:event|meeting|appointment)\s+(?:for\s+)?(.+?)(?:\s+(?:at|on|for)\s+(.+))?$/);
+    if (calMatch) {
+      const title = calMatch[1].trim();
+      const time = calMatch[2] || 'tomorrow';
+      return { intent: 'CALENDAR', contact: null, detail: `${title} on ${time}`, message: `Event created: ${title} on ${time}.`, receipt: [`Event: ${title}`, `When: ${time}`, 'Added to your calendar'], confidence: 0.8, needsConfirm: false };
+    }
+
+    // CAMERA — "open camera", "take a photo", "take a picture"
+    if (t.match(/(?:open|launch|start)\s+(?:the\s+)?camera|take\s+(?:a\s+)?(?:photo|picture|selfie)/)) {
+      return { intent: 'CAMERA', contact: null, detail: '', message: 'Opening your camera.', receipt: ['Camera opening...', 'Say "capture" to take a photo'], confidence: 0.9, needsConfirm: false };
     }
 
     // Unknown
     return null;
   }
 
-  // --- State Management ---
-  function setState(state, intentResult) {
-    if (autoResetTimer) {
-      clearTimeout(autoResetTimer);
-      autoResetTimer = null;
-    }
+  // ===== STATE MANAGEMENT =====
+  let currentState = 'idle';
+  let autoResetTimer = null;
+  let pendingIntent = null;  // For Tier 2 confirmation
 
+  const stateConfig = {
+    idle:      { status: 'Tap to speak', action: '', showCarousel: true, showConfirm: false, showConfirmAction: false, showError: false },
+    listening: { status: 'Listening...', action: '', showCarousel: false, showConfirm: false, showConfirmAction: false, showError: false },
+    thinking:  { status: 'On it...', action: '', showCarousel: false, showConfirm: false, showConfirmAction: false, showError: false },
+    executing: { status: '', action: '', showCarousel: false, showConfirm: false, showConfirmAction: false, showError: false },
+    done:      { status: 'Done', action: '', showCarousel: false, showConfirm: true, showConfirmAction: false, showError: false },
+    error:     { status: 'Didn\'t quite get that', action: '', showCarousel: false, showConfirm: false, showConfirmAction: false, showError: true },
+    confirm:   { status: 'Confirm?', action: '', showCarousel: false, showConfirm: false, showConfirmAction: true, showError: false },
+  };
+
+  function setState(state, intentResult) {
+    if (autoResetTimer) { clearTimeout(autoResetTimer); autoResetTimer = null; }
     currentState = state;
     const config = stateConfig[state];
-
     bubble.className = 'bubble-container ' + stateClasses(state);
     statusText.textContent = config.status;
     actionDesc.textContent = config.action;
     carousel.classList.toggle('hidden', !config.showCarousel);
     confirmCard.classList.toggle('visible', config.showConfirm);
+    confirmActionCard.classList.toggle('visible', config.showConfirmAction);
     errorCard.classList.toggle('visible', config.showError);
-
-    // Hide transcript when not listening
-    if (state !== 'listening') {
-      transcriptBox.classList.remove('visible', 'interim');
-    }
+    if (state !== 'listening') transcriptBox.classList.remove('visible', 'interim');
 
     if (state === 'done' && intentResult) {
       confirmMessage.textContent = intentResult.message;
-      confirmReceipt.innerHTML = intentResult.receipt.map(r =>
-        `<div class="receipt-item">${r}</div>`
-      ).join('');
-      // Speak the confirmation
+      confirmReceipt.innerHTML = intentResult.receipt.map(r => `<div class="receipt-item">${r}</div>`).join('');
+      // Confidence badge
+      const conf = intentResult.confidence || 0.9;
+      let badgeClass = 'confidence-high', badgeText = 'High confidence';
+      if (conf < 0.7) { badgeClass = 'confidence-low'; badgeText = 'Low confidence'; }
+      else if (conf < 0.85) { badgeClass = 'confidence-med'; badgeText = 'Medium confidence'; }
+      confidenceBadge.className = 'confidence-badge ' + badgeClass;
+      confidenceBadge.textContent = badgeText;
       speak(intentResult.message);
-      // Auto-reset after 5s
+      // Track success
+      successCount++;
+      updateCarousel();
+      // Show discovery badge after 3 successes
+      if (successCount === 3) {
+        discoveryBadge.textContent = '💡 You can also say "WhatsApp Rahul" or "Set an alarm for 6am"';
+        discoveryBadge.style.display = 'block';
+        setTimeout(() => { discoveryBadge.style.display = 'none'; }, 5000);
+      }
       autoResetTimer = setTimeout(() => setState('idle'), 5000);
     }
 
+    if (state === 'confirm' && intentResult) {
+      pendingIntent = intentResult;
+      confirmActionMessage.textContent = intentResult.message;
+      confirmActionReceipt.innerHTML = intentResult.receipt.map(r => `<div class="receipt-item">${r}</div>`).join('');
+      speak(intentResult.message + ' — tap confirm or cancel');
+    }
+
     if (state === 'error') {
-      // Speak the error message
       const errMsg = document.getElementById('errorMessage');
       speak(errMsg.textContent || errMsg.innerText);
-      // Auto-reset after 5s
       autoResetTimer = setTimeout(() => setState('idle'), 5000);
     }
   }
 
   function stateClasses(state) {
-    const map = {
-      idle: 'state-idle', listening: 'state-listening', thinking: 'state-thinking',
-      executing: 'state-executing', done: 'state-done', error: 'state-error',
-    };
+    const map = { idle: 'state-idle', listening: 'state-listening', thinking: 'state-thinking', executing: 'state-executing', done: 'state-done', error: 'state-error', confirm: 'state-confirm' };
     return map[state] || 'state-idle';
   }
 
-  // --- Speech Flow ---
+  // ===== SPEECH FLOW =====
   function startListening() {
     if (!recognition || isListening) return;
-
     isListening = true;
     setState('listening');
     transcriptBox.textContent = '';
     transcriptBox.classList.add('visible', 'interim');
-
-    try {
-      recognition.start();
-    } catch (e) {
-      // Already started, ignore
-    }
+    try { recognition.start(); } catch (e) {}
   }
 
   function stopListening() {
@@ -735,111 +521,90 @@
 
   if (recognition) {
     recognition.onresult = function(event) {
-      let finalTranscript = '';
-      let interimTranscript = '';
-
+      let finalTranscript = '', interimTranscript = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
-        if (result.isFinal) {
-          finalTranscript += result[0].transcript;
-        } else {
-          interimTranscript += result[0].transcript;
-        }
+        if (result.isFinal) finalTranscript += result[0].transcript;
+        else interimTranscript += result[0].transcript;
       }
-
-      if (interimTranscript) {
-        transcriptBox.textContent = `"${interimTranscript}"`;
-        transcriptBox.classList.add('interim');
-      }
+      if (interimTranscript) { transcriptBox.textContent = `"${interimTranscript}"`; transcriptBox.classList.add('interim'); }
       if (finalTranscript) {
         transcriptBox.textContent = `"${finalTranscript}"`;
         transcriptBox.classList.remove('interim');
         handleTranscript(finalTranscript);
       }
     };
-
     recognition.onerror = function(event) {
       isListening = false;
-      if (event.error === 'no-speech') {
-        setState('idle');
-        return;
-      }
-      // Show error card
-      const errMsg = document.getElementById('errorMessage');
-      errMsg.innerHTML = `<span class="understood">Microphone issue</span> — try saying <span class="retry">"call Rahul"</span> again`;
+      if (event.error === 'no-speech') { setState('idle'); return; }
+      errorMessage.innerHTML = `<span class="understood">Microphone issue</span> — try saying <span class="retry">"call Rahul"</span> again`;
       setState('error');
     };
-
     recognition.onend = function() {
       isListening = false;
-      // If we never got a result (user tapped to stop), go back to idle
-      if (currentState === 'listening') {
-        setState('idle');
-      }
+      if (currentState === 'listening') setState('idle');
     };
   }
 
   function handleTranscript(transcript) {
     setState('thinking');
-
-    // Simulate processing delay
     setTimeout(() => {
       const intent = parseIntent(transcript);
-
       if (!intent) {
-        // Unknown command
-        const errMsg = document.getElementById('errorMessage');
         const short = transcript.length > 30 ? transcript.substring(0, 30) + '...' : transcript;
-        errMsg.innerHTML = `<span class="understood">Heard "${short}"</span> — try saying <span class="retry">"call Rahul"</span> or <span class="retry">"set a timer"</span>`;
+        errorMessage.innerHTML = `<span class="understood">Heard "${short}"</span> — try saying <span class="retry">"call Rahul"</span> or <span class="retry">"set a timer"</span>`;
         setState('error');
         return;
       }
 
-      // Show executing with action description
+      // Set action description
       const execConfig = stateConfig['executing'];
-      if (intent.intent === 'CALL') {
-        execConfig.action = `Calling ${intent.contact}...`;
-      } else if (intent.intent === 'REMINDER') {
-        execConfig.action = `Setting reminder...`;
-      } else if (intent.intent === 'NAVIGATE') {
-        execConfig.action = `Opening Maps...`;
-      } else if (intent.intent === 'TIMER') {
-        execConfig.action = `Setting timer...`;
-      } else if (intent.intent === 'SMS') {
-        execConfig.action = `Preparing message...`;
-      }
+      const intentLabels = {
+        CALL: `Calling ${intent.contact}...`,
+        REMINDER: 'Setting reminder...',
+        NAVIGATE: 'Opening Maps...',
+        TIMER: 'Setting timer...',
+        ALARM: 'Setting alarm...',
+        SMS: 'Preparing message...',
+        WHATSAPP: 'Opening WhatsApp...',
+        CALENDAR: 'Creating event...',
+        CAMERA: 'Opening camera...',
+      };
+      execConfig.action = intentLabels[intent.intent] || 'Executing...';
       setState('executing');
 
-      // After execution delay, show done
       setTimeout(() => {
-        setState('done', intent);
-      }, 1200);
-    }, 800);
+        // Tier 2: SMS and WhatsApp need confirmation
+        if (intent.needsConfirm) {
+          setState('confirm', intent);
+        } else {
+          setState('done', intent);
+        }
+      }, 1000);
+    }, 600);
   }
 
-  // --- Mic Button ---
-  micBtn.addEventListener('click', () => {
-    if (currentState === 'idle') {
-      startListening();
-    } else if (currentState === 'listening') {
-      stopListening();
-      setState('idle');
-    } else {
-      // In any other state, tap resets to idle
-      setState('idle');
+  // ===== CONFIRM / CANCEL =====
+  btnConfirm.addEventListener('click', () => {
+    if (pendingIntent) {
+      setState('done', pendingIntent);
+      pendingIntent = null;
     }
   });
+  btnCancel.addEventListener('click', () => {
+    pendingIntent = null;
+    setState('idle');
+    speak('Cancelled');
+  });
 
-  // --- Carousel ---
-  function nextExample() {
-    exampleIndex = (exampleIndex + 1) % examples.length;
-    carouselText.textContent = examples[exampleIndex];
-    document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
-      dot.classList.toggle('active', i === exampleIndex % 3);
-    });
-  }
+  // ===== MIC BUTTON =====
+  micBtn.addEventListener('click', () => {
+    if (currentState === 'idle') startListening();
+    else if (currentState === 'listening') { stopListening(); setState('idle'); }
+    else setState('idle');
+  });
 
-  // Tap example to auto-fill and execute
+  // ===== CAROUSEL =====
   carouselText.addEventListener('click', () => {
     if (currentState !== 'idle') return;
     const text = carouselText.textContent.replace(/^"|"$/g, '');
@@ -851,7 +616,8 @@
 
   setInterval(nextExample, 4000);
 
-  // --- Init ---
+  // ===== INIT =====
+  updateCarousel();
   setState('idle');
 </script>
 
