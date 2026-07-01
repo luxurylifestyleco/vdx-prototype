@@ -18,7 +18,7 @@
   @keyframes pulse { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(1.6); opacity: 0; } }
   .status-text { color: #8e8e93; font-size: 15px; font-weight: 500; letter-spacing: 0.3px; min-height: 24px; transition: all 0.3s; }
   .action-desc { color: #aeaeb2; font-size: 13px; min-height: 20px; transition: all 0.3s; }
-  .transcript-box { width: 100%; max-width: 320px; background: #f5f5f7; border-radius: 12px; padding: 10px 14px; min-height: 40px; display: none; align-items: center; justify-content: center; text-align: center; color: #3a3a3c; font-size: 14px; line-height: 1.4; transition: all 0.3s; }
+  .transcript-box { width: 100%; max-width: 320px; background: #f5f5f7; border-radius: 12px; padding: 10px 14px; min-height: 40px; display: none; align-items: center; justify-content: center; text-align: center; color: #3a3a3c; font-size: 14px; line-height: 1.4; transition: all 0.3s; display: none; align-items: center; justify-content: center; text-align: center; }
   .transcript-box.visible { display: flex; }
   .transcript-box.interim { color: #aeaeb2; font-style: italic; }
   .state-idle .mic-button { background: #e8e8ed; }
@@ -103,6 +103,12 @@
   .browser-warning { position: absolute; bottom: 20px; left: 20px; right: 20px; background: #fef3c7; border: 1px solid #fde68a; border-radius: 10px; padding: 10px 14px; color: #92400e; font-size: 12px; text-align: center; display: none; }
   .action-button { display: inline-block; margin-top: 12px; padding: 10px 20px; border-radius: 10px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; background: #6c3aed; color: #fff; text-decoration: none; text-align: center; width: 100%; }
   .action-button:active { background: #5a2fd0; }
+  /* Number input row for unknown contacts */
+  .number-input-row { margin-top: 12px; display: none; gap: 8px; width: 100%; }
+  .number-input-row.visible { display: flex; }
+  .number-input-row input { flex: 1; padding: 10px 14px; border: 1px solid #c4b5fd; border-radius: 10px; font-size: 14px; outline: none; }
+  .number-input-row input:focus { border-color: #6c3aed; }
+  .number-input-row button { padding: 10px 16px; background: #6c3aed; color: #fff; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; white-space: nowrap; }
   @media (max-width: 480px) { .phone { width: 100%; height: 100vh; border-radius: 0; padding: 12px; } }
 </style>
 </head>
@@ -137,18 +143,26 @@
     <div class="card confirm-card" id="confirmCard">
       <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       <div class="title">Done</div>
-      <div class="message" id="confirmMessage">Rahul's phone is now ringing.</div>
+      <div class="message" id="confirmMessage">Done.</div>
       <div class="receipt" id="confirmReceipt"></div>
       <div class="confidence-badge" id="confidenceBadge"></div>
       <a class="action-button" id="actionButton" href="#" target="_blank" style="display:none;">Open</a>
+      <div class="number-input-row" id="numberInputRow">
+        <input type="tel" id="numberInput" placeholder="Enter phone number..." inputmode="numeric">
+        <button id="numberSaveBtn">Save</button>
+      </div>
     </div>
 
     <!-- Confirmation Action Card (Tier 2) -->
     <div class="card confirm-action-card" id="confirmActionCard">
       <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
       <div class="title">Confirm</div>
-      <div class="message" id="confirmActionMessage">Send message to Mom?</div>
+      <div class="message" id="confirmActionMessage">Send message?</div>
       <div class="receipt" id="confirmActionReceipt"></div>
+      <div class="number-input-row" id="confirmNumberRow" style="margin-top:0;">
+        <input type="tel" id="confirmNumberInput" placeholder="Enter phone number..." inputmode="numeric">
+        <button id="confirmNumberSaveBtn" style="padding:10px;">Save</button>
+      </div>
       <div class="actions">
         <button class="btn-confirm" id="btnConfirm">✓ Confirm</button>
         <button class="btn-cancel" id="btnCancel">✕ Cancel</button>
@@ -160,7 +174,7 @@
       <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
       <div class="title">Didn't quite get that</div>
       <div class="message" id="errorMessage">
-        <span class="understood">Heard "call Rahul"</span> — try saying <span class="retry">"call Rahul mobile"</span>
+        Try saying something below
       </div>
     </div>
 
@@ -170,9 +184,6 @@
       <div class="carousel-example" id="carouselText">"Call Eva"</div>
       <div class="carousel-dots" id="carouselDots"></div>
     </div>
-
-    <!-- Discovery badge -->
-    <div class="discovery-badge" id="discoveryBadge"></div>
 
     <div class="browser-warning" id="browserWarning">
       ⚠️ Speech recognition not available. Try Chrome on Android.
@@ -206,6 +217,24 @@
   const discoveryBadge = document.getElementById('discoveryBadge');
   const browserWarning = document.getElementById('browserWarning');
   const actionButton = document.getElementById('actionButton');
+  const numberInputRow = document.getElementById('numberInputRow');
+  const numberInput = document.getElementById('numberInput');
+  const numberSaveBtn = document.getElementById('numberSaveBtn');
+  const confirmNumberRow = document.getElementById('confirmNumberRow');
+  const confirmNumberInput = document.getElementById('confirmNumberInput');
+  const confirmNumberSaveBtn = document.getElementById('confirmNumberSaveBtn');
+
+  // ===== STORED CONTACTS (localStorage) =====
+  function loadContacts() {
+    try { return JSON.parse(localStorage.getItem('vdx_contacts')) || {}; } catch(e) { return {}; }
+  }
+  function saveContacts(contacts) {
+    localStorage.setItem('vdx_contacts', JSON.stringify(contacts));
+  }
+  let knownContacts = loadContacts();
+
+  let pendingContactName = null;  // name we're collecting a number for
+  let pendingContactIntent = null; // for confirm flow
 
   // ===== EXAMPLES =====
   const allExamples = [
@@ -215,9 +244,9 @@
     '"Navigate to Apollo Pharmacy"',
     '"Set a timer for 10 minutes"',
     '"What\'s the weather in Mumbai"',
+    '"What\'s on my calendar today"',
     '"Open camera"',
     '"Set an alarm for 6am"',
-    '"Remind me to buy milk at 5pm"',
   ];
 
   let exampleIndex = 0;
@@ -276,33 +305,79 @@
     browserWarning.style.display = 'block';
   }
 
+  // ===== NUMBER COLLECTION =====
+  function showNumberInput(name, intentType, detail) {
+    pendingContactName = name;
+    pendingContactIntent = { intent: intentType, name, detail };
+    if (confirmCard.classList.contains('visible')) {
+      numberInputRow.classList.add('visible');
+      numberInput.placeholder = `Enter ${name}'s number...`;
+      numberInput.value = knownContacts[name.toLowerCase()] || '';
+      numberInput.focus();
+    } else if (confirmActionCard.classList.contains('visible')) {
+      confirmNumberRow.style.display = 'flex';
+      confirmNumberInput.placeholder = `Enter ${name}'s number...`;
+      confirmNumberInput.value = knownContacts[name.toLowerCase()] || '';
+      confirmNumberInput.focus();
+    }
+  }
+
+  function saveNumber() {
+    const input = numberInputRow.classList.contains('visible') ? numberInput : confirmNumberInput;
+    const name = pendingContactName;
+    if (!name) return;
+    const number = input.value.trim();
+    if (!number) return;
+    knownContacts[name.toLowerCase()] = number;
+    saveContacts(knownContacts);
+    // Re-execute the pending action with the number
+    const intent = pendingContactIntent;
+    pendingContactName = null;
+    pendingContactIntent = null;
+    numberInputRow.classList.remove('visible');
+    confirmNumberRow.style.display = 'none';
+    executeAndShow(intent);
+  }
+
+  numberSaveBtn.addEventListener('click', saveNumber);
+  confirmNumberSaveBtn.addEventListener('click', saveNumber);
+  numberInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveNumber(); });
+  confirmNumberInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveNumber(); });
+
   // ===== REAL EXECUTION ENGINE =====
-  // Opens the right app on your phone via deep links
   function executeRealAction(intent, name, detail) {
     const encoded = encodeURIComponent(name);
     const encodedDetail = encodeURIComponent(detail || '');
+    const key = name.toLowerCase();
+    const number = knownContacts[key];
 
     switch (intent) {
       case 'CALL':
-        // Opens dialer with the name — user just taps Call
-        return { url: `tel:${name}`, label: 'Open Dialer' };
+        if (number) return { url: `tel:${number}`, label: 'Open Dialer' };
+        // No number on web — show number input
+        return null;
 
       case 'SMS':
-        // Opens SMS app with the name as recipient
-        return { url: `sms:${name}?body=${encodedDetail || 'Hi'}`, label: 'Open Messages' };
+        if (number) {
+          const body = detail ? `?body=${encodeURIComponent(detail)}` : '';
+          return { url: `sms:${number}${body}`, label: 'Open Messages' };
+        }
+        return null;
 
       case 'WHATSAPP':
-        // Opens WhatsApp — if name looks like a number use wa.me, otherwise just open WhatsApp
-        if (name.replace(/[\s+\-]/g, '').match(/^\d{7,15}$/)) {
-          return { url: `https://wa.me/${name.replace(/[\s+\-]/g, '')}`, label: 'Open WhatsApp' };
+        if (number) {
+          const clean = number.replace(/[\s+\-]/g, '');
+          if (detail) {
+            return { url: `https://wa.me/${clean}?text=${encodeURIComponent(detail)}`, label: 'Open WhatsApp Chat' };
+          }
+          return { url: `https://wa.me/${clean}`, label: 'Open WhatsApp Chat' };
         }
-        return { url: `https://wa.me/?text=${encodedDetail || 'Hi ' + encoded}`, label: 'Open WhatsApp' };
+        return null;
 
       case 'NAVIGATE':
         return { url: `https://maps.google.com/?q=${encoded}`, label: 'Open Maps' };
 
       case 'TIMER':
-        // Android intent to open Clock app timer
         return { url: `intent://timer#Intent;action=android.intent.action.VIEW;package=com.google.android.deskclock;end`, label: 'Open Clock' };
 
       case 'ALARM':
@@ -320,24 +395,41 @@
       case 'REMINDER':
         return { url: `intent://reminder#Intent;action=android.intent.action.VIEW;package=com.google.android.apps.tasks;end`, label: 'Open Tasks' };
 
+      case 'CALENDAR_QUERY':
+        // Can't read calendar from web, open it and let user see
+        return { url: `intent://calendar#Intent;action=android.intent.action.VIEW;package=com.google.android.calendar;end`, label: 'Open Calendar' };
+
       default:
         return null;
     }
+  }
+
+  function needsNumber(name) {
+    const key = name.toLowerCase();
+    return !knownContacts[key];
   }
 
   // ===== INTENT PARSER (works with ANY name) =====
   function parseIntent(transcript) {
     const t = transcript.toLowerCase().trim();
 
-    // CALL — "call X", "ring X", "phone X", "dial X", "call X on mobile"
+    // CALENDAR QUERY — "what's on my calendar", "what's my today's calendar look like", "show my calendar", "my schedule today"
+    if (t.match(/what(?:(?:'s| is)\s+)?(?:on|in|my)\s+(?:my\s+)?(?:today(?:'s)?\s+)?(?:calendar|schedule|agenda|events?|plans?)/) ||
+        t.match(/show\s+(?:me\s+)?(?:my\s+)?(?:today(?:'s)?\s+)?(?:calendar|schedule|agenda|events?|plans?)/) ||
+        t.match(/what(?:'s| is)\s+(?:my\s+)?(?:schedule|agenda|plan)\s+(?:for\s+)?(?:today|tomorrow)/) ||
+        t.match(/do\s+(?:i\s+)?have\s+(?:any\s+)?(?:events?|plans?|meetings?)\s+(?:for\s+)?(?:today|tomorrow)/)) {
+      return { intent: 'CALENDAR_QUERY', name: '', detail: '', message: 'Opening your calendar', receipt: ['Showing today\'s events', 'Open calendar app to view'], confidence: 0.85, needsConfirm: false };
+    }
+
+    // CALL — "call X", "ring X", "phone X", "dial X"
     const callMatch = t.match(/(?:call|ring|phone|dial)\s+(?:my\s+)?(.+?)(?:\s+(?:on\s+)?(mobile|phone|work|home|office))?(?:\s|$|\.)/);
     if (callMatch) {
       const name = callMatch[1].trim().replace(/^(the|a|an)\s+/i, '');
       const phoneType = callMatch[2] || 'mobile';
-      return { intent: 'CALL', name, detail: phoneType, message: `Calling ${name}...`, receipt: [`Opening dialer for ${name}`, `Phone: ${phoneType}`], confidence: 0.9, needsConfirm: false };
+      return { intent: 'CALL', name: capitalize(name), detail: phoneType, message: `Calling ${capitalize(name)}...`, receipt: [`Open dialer for ${capitalize(name)}`, needsNumber(name) ? 'Need phone number' : `Phone: ${phoneType}`], confidence: 0.9, needsConfirm: false };
     }
 
-    // REMINDER — "remind me to X", "remind me X at Y"
+    // REMINDER — "remind me to X", "set a reminder"
     const remindMatch = t.match(/(?:remind|reminder|set\s+(?:a\s+)?reminder)\s+(?:me\s+)?(?:to\s+)?(.+?)(?:\s+(?:at|in|by|for|about)\s+(.+))?$/);
     if (remindMatch) {
       const task = remindMatch[1].trim().replace(/^(to|about)\s+/i, '');
@@ -349,20 +441,17 @@
     const navMatch = t.match(/(?:navigate|take\s+(?:me\s+)?to|go\s+to|drive\s+to|directions\s+to|find|show\s+(?:me\s+)?(?:the\s+)?way\s+to)\s+(.+?)$/);
     if (navMatch) {
       const place = navMatch[1].trim().replace(/^(the|a|an)\s+/i, '');
-      return { intent: 'NAVIGATE', name: place, detail: '', message: `Navigating to ${place}`, receipt: [`Destination: ${place}`, 'Opening Maps'], confidence: 0.9, needsConfirm: false };
+      return { intent: 'NAVIGATE', name: place, detail: '', message: `Navigating to ${capitalize(place)}`, receipt: [`Destination: ${capitalize(place)}`, 'Opening Maps'], confidence: 0.9, needsConfirm: false };
     }
 
-    // TIMER — "set a timer for X", "X minute timer", "X minutes"
+    // TIMER — "set a timer for X", "X minutes"
     const timerMatch = t.match(/(?:set\s+(?:a|an)\s+)?timer\s+(?:for\s+)?(.+?)$/);
     if (timerMatch) {
-      const duration = timerMatch[1].trim();
-      return { intent: 'TIMER', name: '', detail: duration, message: `Timer set for ${duration}`, receipt: [`Duration: ${duration}`], confidence: 0.9, needsConfirm: false };
+      return { intent: 'TIMER', name: '', detail: timerMatch[1].trim(), message: `Timer set for ${timerMatch[1].trim()}`, receipt: [`Duration: ${timerMatch[1].trim()}`], confidence: 0.9, needsConfirm: false };
     }
     const durationMatch = t.match(/^(.+?)\s+(minutes|seconds|mins|secs)\s*$/);
     if (durationMatch) {
-      const num = durationMatch[1].trim();
-      const unit = durationMatch[2];
-      return { intent: 'TIMER', name: '', detail: `${num} ${unit}`, message: `Timer set for ${num} ${unit}`, receipt: [`Duration: ${num} ${unit}`], confidence: 0.85, needsConfirm: false };
+      return { intent: 'TIMER', name: '', detail: `${durationMatch[1]} ${durationMatch[2]}`, message: `Timer set for ${durationMatch[1]} ${durationMatch[2]}`, receipt: [`Duration: ${durationMatch[1]} ${durationMatch[2]}`], confidence: 0.85, needsConfirm: false };
     }
 
     // ALARM — "set an alarm for X", "wake me up at X"
@@ -372,23 +461,23 @@
       return { intent: 'ALARM', name: '', detail: time, message: `Alarm set for ${time}`, receipt: [`Time: ${time}`], confidence: 0.85, needsConfirm: false };
     }
 
-    // WHATSAPP — "WhatsApp X", "WhatsApp X saying Y", "wa X"
+    // WHATSAPP — "WhatsApp X", "WhatsApp X saying Y"
     const waMatch = t.match(/(?:whatsapp|wa)\s+(.+?)(?:\s+(?:saying|that|about|with|message)\s+(.+))?$/);
     if (waMatch) {
       const name = waMatch[1].trim().replace(/^(my|the|a)\s+/i, '');
       const msg = waMatch[2] || '';
-      return { intent: 'WHATSAPP', name, detail: msg, message: `WhatsApp: ${name}`, receipt: [`To: ${name}`, msg ? `Message: "${msg}"` : 'Opening chat'], confidence: 0.8, needsConfirm: true };
+      return { intent: 'WHATSAPP', name: capitalize(name), detail: msg, message: `WhatsApp: ${capitalize(name)}`, receipt: [`To: ${capitalize(name)}`, msg ? `Message: "${msg}"` : 'Opening chat'], confidence: 0.8, needsConfirm: true };
     }
 
-    // SMS / Message — "message X", "text X", "send X to Y", "message X saying Y"
+    // SMS / Message — "message X", "text X", "send X to Y"
     const smsMatch = t.match(/(?:send|text|message)\s+(?:(?:a\s+)?(?:message|text)\s+)?(?:to\s+)?(.+?)(?:\s+(?:saying|that|about|with)\s+(.+))?$/);
     if (smsMatch) {
       const name = smsMatch[1].trim().replace(/^(my|the|a)\s+/i, '');
       const msg = smsMatch[2] || '';
-      return { intent: 'SMS', name, detail: msg, message: `Message ${name}`, receipt: [`To: ${name}`, msg ? `Message: "${msg}"` : 'Opening messages'], confidence: 0.8, needsConfirm: true };
+      return { intent: 'SMS', name: capitalize(name), detail: msg, message: `Message ${capitalize(name)}`, receipt: [`To: ${capitalize(name)}`, msg ? `Message: "${msg}"` : 'Opening messages'], confidence: 0.8, needsConfirm: true };
     }
 
-    // CALENDAR — "create an event", "schedule X"
+    // CALENDAR — "create an event", "schedule X", "create a meeting"
     const calMatch = t.match(/(?:create|add|schedule|set)\s+(?:a\s+)?(?:calendar\s+)?(?:event|meeting|appointment)\s+(?:for\s+)?(.+?)(?:\s+(?:at|on|for)\s+(.+))?$/);
     if (calMatch) {
       const title = calMatch[1].trim();
@@ -396,23 +485,28 @@
       return { intent: 'CALENDAR', name: '', detail: `${title} on ${time}`, message: `Event: ${title} on ${time}`, receipt: [`Event: ${title}`, `When: ${time}`], confidence: 0.8, needsConfirm: false };
     }
 
-    // WEATHER — "what's the weather", "weather in X", "temperature"
+    // WEATHER — "what's the weather", "weather in X"
     const weatherMatch = t.match(/(?:what(?:'s| is)\s+)?(?:the\s+)?(?:weather|temperature|forecast)(?:\s+(?:in|at|for|like)\s+(.+?))?(?:\s|$|\.|\?)/);
     if (weatherMatch) {
       const place = weatherMatch[1] || 'your location';
-      return { intent: 'WEATHER', name: place, detail: '', message: `Weather for ${place}`, receipt: [`Location: ${place}`, 'Opening weather'], confidence: 0.85, needsConfirm: false };
+      return { intent: 'WEATHER', name: place, detail: '', message: `Weather for ${capitalize(place)}`, receipt: [`Location: ${capitalize(place)}`, 'Opening weather'], confidence: 0.85, needsConfirm: false };
     }
     if (t.match(/^(?:how(?:'s| is)\s+)?(?:the\s+)?weather/)) {
       return { intent: 'WEATHER', name: 'your location', detail: '', message: 'Weather for your location', receipt: ['Location: your location', 'Opening weather'], confidence: 0.85, needsConfirm: false };
     }
 
-    // CAMERA — "open camera", "take a photo"
+    // CAMERA — "open camera", "take a photo", "take a picture"
     if (t.match(/(?:open|launch|start)\s+(?:the\s+)?camera|take\s+(?:a\s+)?(?:photo|picture|selfie)/)) {
       return { intent: 'CAMERA', name: '', detail: '', message: 'Opening camera', receipt: ['Opening camera app'], confidence: 0.9, needsConfirm: false };
     }
 
     // Unknown
     return null;
+  }
+
+  function capitalize(s) {
+    if (!s) return s;
+    return s.charAt(0).toUpperCase() + s.slice(1);
   }
 
   // ===== STATE MANAGEMENT =====
@@ -442,6 +536,8 @@
     confirmActionCard.classList.toggle('visible', config.showConfirmAction);
     errorCard.classList.toggle('visible', config.showError);
     actionButton.style.display = 'none';
+    numberInputRow.classList.remove('visible');
+    confirmNumberRow.style.display = 'none';
     if (state !== 'listening') transcriptBox.classList.remove('visible', 'interim');
 
     if (state === 'done' && intentResult) {
@@ -454,22 +550,28 @@
       confidenceBadge.className = 'confidence-badge ' + badgeClass;
       confidenceBadge.textContent = badgeText;
 
-      // Show real action button
-      const action = executeRealAction(intentResult.intent, intentResult.name, intentResult.detail);
-      if (action) {
-        actionButton.href = action.url;
-        actionButton.textContent = action.label;
-        actionButton.style.display = 'block';
+      // Check if this intent needs a number
+      if ((intentResult.intent === 'CALL' || intentResult.intent === 'SMS' || intentResult.intent === 'WHATSAPP') && intentResult.name && needsNumber(intentResult.name)) {
+        showNumberInput(intentResult.name, intentResult.intent, intentResult.detail);
+        actionButton.style.display = 'none';
+      } else {
+        executeAndShow(intentResult);
       }
 
       speak(intentResult.message);
-      autoResetTimer = setTimeout(() => setState('idle'), 8000);
+      autoResetTimer = setTimeout(() => setState('idle'), 10000);
     }
 
     if (state === 'confirm' && intentResult) {
       pendingIntent = intentResult;
       confirmActionMessage.textContent = intentResult.message;
       confirmActionReceipt.innerHTML = intentResult.receipt.map(r => `<div class="receipt-item">${r}</div>`).join('');
+      // Check if needs number
+      if ((intentResult.intent === 'WHATSAPP' || intentResult.intent === 'SMS') && intentResult.name && needsNumber(intentResult.name)) {
+        confirmNumberRow.style.display = 'flex';
+        confirmNumberInput.placeholder = `Enter ${intentResult.name}'s number...`;
+        confirmNumberInput.value = knownContacts[intentResult.name.toLowerCase()] || '';
+      }
       speak(intentResult.message + ' — tap confirm or cancel');
     }
 
@@ -477,6 +579,15 @@
       const errMsg = document.getElementById('errorMessage');
       speak(errMsg.textContent || errMsg.innerText);
       autoResetTimer = setTimeout(() => setState('idle'), 5000);
+    }
+  }
+
+  function executeAndShow(intentResult) {
+    const action = executeRealAction(intentResult.intent, intentResult.name, intentResult.detail);
+    if (action) {
+      actionButton.href = action.url;
+      actionButton.textContent = action.label;
+      actionButton.style.display = 'block';
     }
   }
 
@@ -534,7 +645,17 @@
       const intent = parseIntent(transcript);
       if (!intent) {
         const short = transcript.length > 30 ? transcript.substring(0, 30) + '...' : transcript;
-        errorMessage.innerHTML = `<span class="understood">Heard "${short}"</span> — try saying <span class="retry">"call Eva"</span> or <span class="retry">"message Eva"</span>`;
+        errorMessage.innerHTML = `
+          <span class="understood">Heard "${short}"</span><br><br>
+          I can do any of these:<br>
+          <span class="retry">📞 "call Rahul"</span><br>
+          <span class="retry">⏰ "set a timer for 10 minutes"</span><br>
+          <span class="retry">🔔 "remind me to buy milk at 5"</span><br>
+          <span class="retry">📍 "navigate to Apollo Pharmacy"</span><br>
+          <span class="retry">💬 "text Mom saying I'm on my way"</span><br>
+          <span class="retry">📸 "open camera"</span><br>
+          <span class="retry">📅 "create an event for tomorrow at 3"</span>
+        `;
         setState('error');
         return;
       }
@@ -549,6 +670,7 @@
         SMS: `Preparing message for ${intent.name}...`,
         WHATSAPP: `Opening WhatsApp for ${intent.name}...`,
         CALENDAR: 'Creating event...',
+        CALENDAR_QUERY: 'Opening calendar...',
         CAMERA: 'Opening camera...',
         WEATHER: 'Checking weather...',
       };
@@ -568,12 +690,24 @@
   // ===== CONFIRM / CANCEL =====
   btnConfirm.addEventListener('click', () => {
     if (pendingIntent) {
+      // If still needs a number, don't proceed
+      if ((pendingIntent.intent === 'WHATSAPP' || pendingIntent.intent === 'SMS') && pendingIntent.name && needsNumber(pendingIntent.name) && !confirmNumberInput.value.trim()) {
+        confirmNumberInput.focus();
+        return;
+      }
+      // Save number if entered
+      const num = confirmNumberInput.value.trim();
+      if (num && pendingIntent.name) {
+        knownContacts[pendingIntent.name.toLowerCase()] = num;
+        saveContacts(knownContacts);
+      }
       setState('done', pendingIntent);
       pendingIntent = null;
     }
   });
   btnCancel.addEventListener('click', () => {
     pendingIntent = null;
+    confirmNumberRow.style.display = 'none';
     setState('idle');
     speak('Cancelled');
   });
